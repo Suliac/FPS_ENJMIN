@@ -1,3 +1,4 @@
+# Add any directories, files, or patterns you don't want to be tracked by version control
 /[Ll]ibrary/
 /[Tt]emp/
 /[Oo]bj/
@@ -32,3 +33,9 @@ sysinfo.txt
 # Builds
 *.apk
 *.unitypackage
+
+#WWise
+/Assets/StreamingAssets/Audio/GeneratedSoundBanks/*
+/Assets/StreamingAssets/Audio/GeneratedSoundBanks/*/*
+WwiseSettings.xml
+Assets\Wwise\Editor\ProjectData\AkWwiseProjectData.asset
