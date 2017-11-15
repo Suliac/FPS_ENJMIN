@@ -3,8 +3,23 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Networking;
 
+[System.Serializable]
+public class Weapon
+{
+    public string Name;
+    public float RateOfFire;
+    public float AnimationTimePreparation;
+    public int MaxAmmo;
+    public int Damages;
+    public Transform FirePosition;
+    public Transform WeaponPositionned;
+}
+
 public class PlayerController : NetworkBehaviour
 {
+    public List<Weapon> Weapons;
+    private int weaponIndex = 0;
+    private float deltaTimeShooting = 0.0f;
 
     public Transform Bullet;
     public Transform Camera;
@@ -24,6 +39,9 @@ public class PlayerController : NetworkBehaviour
 
     private bool isWalking = false;
     private bool isRunning = false;
+    private bool isShooting = false;
+    private bool wasPreviouslyShooting = false;
+    private bool isFirstShoot;
 
     private Vector3 moveDirection;
     private Vector2 input;
@@ -43,6 +61,8 @@ public class PlayerController : NetworkBehaviour
 
         camTargetRot = Camera.localRotation;
         charTargetRot = transform.localRotation;
+
+        Weapons[weaponIndex].WeaponPositionned.gameObject.SetActive(true);
     }
 
     // Update is called once per frame
@@ -50,10 +70,6 @@ public class PlayerController : NetworkBehaviour
     {
         if (!isLocalPlayer)
             return; // If the player isn't the player of the current client, we don't update his position
-
-        //var x = Input.GetAxis("Horizontal") * 0.1f;
-        //var z = Input.GetAxis("Vertical") * 0.1f;
-        //transform.Translate(x, 0, z);
 
         if (!isPreviouslyGrounded && characterController.isGrounded)
         {
@@ -67,12 +83,7 @@ public class PlayerController : NetworkBehaviour
         }
 
         isPreviouslyGrounded = characterController.isGrounded;
-
-        if (Input.GetButton("Fire1"))
-        {
-            CmdFire();
-        }
-
+        
     }
 
     private void FixedUpdate()
@@ -111,24 +122,17 @@ public class PlayerController : NetworkBehaviour
         }
 
         var m_CollisionFlags = characterController.Move(moveDirection * Time.fixedDeltaTime); // move the player
+
         transform.localRotation = charTargetRot; // move the cam of the player
-        Camera.localRotation = camTargetRot; // move the cam
+        Camera.parent.localRotation = camTargetRot; // move the cam
     }
 
     private void GetInput(out float speed)
     {
-        // Read input
+        ///////////////////// Walk
         float horizontal = Input.GetAxis("Horizontal");
         float vertical = Input.GetAxis("Vertical");
-
-        float yRot = Input.GetAxis("Mouse X") * XSensitivity;
-        float xRot = Input.GetAxis("Mouse Y") * YSensitivity;
-
-        camTargetRot *= Quaternion.Euler(-xRot, 0f, 0f);
-        charTargetRot *= Quaternion.Euler(0f, yRot, 0f);
-
-        //bool waswalking = isWalking;
-
+        
         isWalking = !Input.GetKey(KeyCode.LeftShift) && (horizontal != 0.0f || vertical != 0.0f);
         isRunning = Input.GetKey(KeyCode.LeftShift) && (horizontal != 0.0f || vertical != 0.0f);
 
@@ -137,6 +141,43 @@ public class PlayerController : NetworkBehaviour
         input = new Vector2(horizontal, vertical);
 
         animator.SetBool("IsWalking", isWalking || isRunning);
+
+        ///////////////////// Cams
+        float yRot = Input.GetAxis("Mouse X") * XSensitivity;
+        float xRot = Input.GetAxis("Mouse Y") * YSensitivity;
+
+        camTargetRot *= Quaternion.Euler(-xRot, 0f, 0f);
+        charTargetRot *= Quaternion.Euler(0f, yRot, 0f);
+
+        ///////////////////// Fire
+        if (Input.GetButton("Fire1"))
+        {
+            deltaTimeShooting += Time.fixedDeltaTime;
+            if (deltaTimeShooting >= Weapons[weaponIndex].RateOfFire)
+            {
+                isShooting = true;
+                animator.SetBool("IsShooting", true);
+
+                if (isShooting && !wasPreviouslyShooting)
+                    isFirstShoot = true;
+
+                if ((isFirstShoot && deltaTimeShooting >= Weapons[weaponIndex].AnimationTimePreparation) || !isFirstShoot)
+                {
+                    CmdFire();
+
+                    deltaTimeShooting -= Weapons[weaponIndex].RateOfFire;
+                    isFirstShoot = false; 
+                }
+            }
+        }
+
+        if (!Input.GetButton("Fire1") && isShooting) // juste stop shooting
+        {
+            isShooting = false;
+            animator.SetBool("IsShooting", false);
+        }
+
+        wasPreviouslyShooting = isShooting;
 
         // normalize input if it exceeds 1 in combined length:
         if (input.sqrMagnitude > 1)
@@ -154,7 +195,7 @@ public class PlayerController : NetworkBehaviour
     [Command]
     void CmdFire()
     {
-        var bullet = Instantiate(Bullet, transform.position + transform.forward, Quaternion.identity);
+        var bullet = Instantiate(Bullet, Weapons[weaponIndex].FirePosition.position, Quaternion.identity);
 
         bullet.GetComponent<Rigidbody>().AddForce(Camera.transform.forward * 40, ForceMode.Impulse);
 
