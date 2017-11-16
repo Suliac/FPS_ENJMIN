@@ -39,7 +39,7 @@ public class PlayerController : NetworkBehaviour
 
     private bool isWalking = false;
     private bool isRunning = false;
-    private bool isShooting = false;
+    public bool isShooting = false;
     private bool wasPreviouslyShooting = false;
     private bool isFirstShoot;
 
@@ -48,7 +48,11 @@ public class PlayerController : NetworkBehaviour
 
     private Quaternion camTargetRot;
     private Quaternion charTargetRot;
+    private Quaternion shootArmRot;
+    private Quaternion shootLeftArmRot;
 
+    private Transform rightArm;
+    private Transform leftArm;
 
     // Use this for initialization
     void Start()
@@ -60,9 +64,14 @@ public class PlayerController : NetworkBehaviour
         Cursor.visible = false;
 
         camTargetRot = Camera.localRotation;
+        shootArmRot = Camera.localRotation;
+        shootLeftArmRot = Camera.localRotation;
         charTargetRot = transform.localRotation;
 
         Weapons[weaponIndex].WeaponPositionned.gameObject.SetActive(true);
+
+        rightArm = GameObject.Find("RightArmDummy").transform;
+        leftArm = GameObject.Find("LeftArmDummy").transform;
     }
 
     // Update is called once per frame
@@ -83,7 +92,7 @@ public class PlayerController : NetworkBehaviour
         }
 
         isPreviouslyGrounded = characterController.isGrounded;
-        
+
     }
 
     private void FixedUpdate()
@@ -101,7 +110,7 @@ public class PlayerController : NetworkBehaviour
 
         moveDirection.x = desiredMove.x * speed;
         moveDirection.z = desiredMove.z * speed;
-        
+
         if (characterController.isGrounded)
         {
             moveDirection.y = -10;
@@ -123,8 +132,18 @@ public class PlayerController : NetworkBehaviour
 
         var m_CollisionFlags = characterController.Move(moveDirection * Time.fixedDeltaTime); // move the player
 
-        transform.localRotation = charTargetRot; // move the cam of the player
-        Camera.parent.localRotation = camTargetRot; // move the cam
+        transform.localRotation = charTargetRot; // rotate the player 
+        Camera.parent.localRotation = camTargetRot; // rotate the cam
+
+    }
+
+    private void LateUpdate()
+    {
+        if (isShooting)
+        {
+            rightArm.rotation *= shootArmRot;
+            leftArm.rotation *= shootLeftArmRot;
+        }
     }
 
     private void GetInput(out float speed)
@@ -132,7 +151,7 @@ public class PlayerController : NetworkBehaviour
         ///////////////////// Walk
         float horizontal = Input.GetAxis("Horizontal");
         float vertical = Input.GetAxis("Vertical");
-        
+
         isWalking = !Input.GetKey(KeyCode.LeftShift) && (horizontal != 0.0f || vertical != 0.0f);
         isRunning = Input.GetKey(KeyCode.LeftShift) && (horizontal != 0.0f || vertical != 0.0f);
 
@@ -146,7 +165,16 @@ public class PlayerController : NetworkBehaviour
         float yRot = Input.GetAxis("Mouse X") * XSensitivity;
         float xRot = Input.GetAxis("Mouse Y") * YSensitivity;
 
-        camTargetRot *= Quaternion.Euler(-xRot, 0f, 0f);
+        Quaternion rotationMin = Quaternion.Euler(new Vector3(-50f, 0f, 0f));
+        Quaternion rotationMax = Quaternion.Euler(new Vector3(50f, 0f, 0f));
+
+        if (xRot < 0.0f && Camera.parent.rotation.x < rotationMax.x || xRot > 0.0f && Camera.parent.rotation.x > rotationMin.x)
+        {
+            camTargetRot *= Quaternion.Euler(-xRot, 0f, 0f);
+            shootArmRot *= Quaternion.Euler(0f, -xRot, 0f);
+            shootLeftArmRot *= Quaternion.Euler(0f, xRot, 0f);
+        }
+
         charTargetRot *= Quaternion.Euler(0f, yRot, 0f);
 
         ///////////////////// Fire
@@ -166,7 +194,7 @@ public class PlayerController : NetworkBehaviour
                     CmdFire();
 
                     deltaTimeShooting -= Weapons[weaponIndex].RateOfFire;
-                    isFirstShoot = false; 
+                    isFirstShoot = false;
                 }
             }
         }
