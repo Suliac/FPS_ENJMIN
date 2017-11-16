@@ -33,13 +33,19 @@ public class PlayerController : NetworkBehaviour
     private CharacterController characterController;
     private Animator animator;
 
-    private bool isPreviouslyGrounded = false;
+    [SyncVar]
     private bool isJumping = false;
-    private bool wantToJump = false;
 
+    [SyncVar]
     private bool isWalking = false;
+
+    [SyncVar]
     private bool isRunning = false;
+
+    [SyncVar]
     public bool isShooting = false;
+
+    private bool isPreviouslyGrounded = false;
     private bool wasPreviouslyShooting = false;
     private bool isFirstShoot;
 
@@ -53,6 +59,17 @@ public class PlayerController : NetworkBehaviour
 
     private Transform rightArm;
     private Transform leftArm;
+    private Transform head;
+
+    void Awake()
+    {
+        rightArm = GameObject.Find("RightArmDummy").transform;
+        leftArm = GameObject.Find("LeftArmDummy").transform;
+        head = GameObject.Find("HeadDummy").transform;
+
+
+
+    }
 
     // Use this for initialization
     void Start()
@@ -70,8 +87,10 @@ public class PlayerController : NetworkBehaviour
 
         Weapons[weaponIndex].WeaponPositionned.gameObject.SetActive(true);
 
-        rightArm = GameObject.Find("RightArmDummy").transform;
-        leftArm = GameObject.Find("LeftArmDummy").transform;
+        if (!isLocalPlayer)
+        {
+            Camera.gameObject.SetActive(false);
+        }
     }
 
     // Update is called once per frame
@@ -83,7 +102,7 @@ public class PlayerController : NetworkBehaviour
         if (!isPreviouslyGrounded && characterController.isGrounded)
         {
             moveDirection.y = 0f;
-            animator.SetBool("IsJumping", false);
+            //animator.SetBool("IsJumping", false);
             isJumping = false;
         }
         if (!characterController.isGrounded && !isJumping && isPreviouslyGrounded)
@@ -97,6 +116,11 @@ public class PlayerController : NetworkBehaviour
 
     private void FixedUpdate()
     {
+        Animate();
+
+        if (!isLocalPlayer)
+            return; // If the player isn't the player of the current client, we don't update his position
+
         float speed;
         GetInput(out speed);
         // always move along the camera forward as it is the direction that it being aimed at
@@ -119,8 +143,7 @@ public class PlayerController : NetworkBehaviour
             {
                 moveDirection.y = JumpSpeed;
                 //PlayJumpSound();
-                animator.SetBool("IsJumping", true);
-                wantToJump = false;
+                //animator.SetBool("IsJumping", true);
                 isJumping = true;
 
             }
@@ -130,15 +153,18 @@ public class PlayerController : NetworkBehaviour
             moveDirection += Physics.gravity * GravityMultiplier * Time.fixedDeltaTime;
         }
 
-        var m_CollisionFlags = characterController.Move(moveDirection * Time.fixedDeltaTime); // move the player
+        //var m_CollisionFlags = characterController.Move(moveDirection * Time.fixedDeltaTime); // move the player
+        CmdMove(moveDirection, Time.fixedDeltaTime, camTargetRot, charTargetRot);
 
-        transform.localRotation = charTargetRot; // rotate the player 
-        Camera.parent.localRotation = camTargetRot; // rotate the cam
-
+       
     }
 
     private void LateUpdate()
     {
+        if (!isLocalPlayer)
+            return; // If the player isn't the player of the current client, we don't update his position
+
+        head.localRotation = camTargetRot;
         if (isShooting)
         {
             rightArm.rotation *= shootArmRot;
@@ -184,7 +210,7 @@ public class PlayerController : NetworkBehaviour
             if (deltaTimeShooting >= Weapons[weaponIndex].RateOfFire)
             {
                 isShooting = true;
-                animator.SetBool("IsShooting", true);
+                //animator.SetBool("IsShooting", true);
 
                 if (isShooting && !wasPreviouslyShooting)
                     isFirstShoot = true;
@@ -202,7 +228,7 @@ public class PlayerController : NetworkBehaviour
         if (!Input.GetButton("Fire1") && isShooting) // juste stop shooting
         {
             isShooting = false;
-            animator.SetBool("IsShooting", false);
+            //animator.SetBool("IsShooting", false);
         }
 
         wasPreviouslyShooting = isShooting;
@@ -219,6 +245,13 @@ public class PlayerController : NetworkBehaviour
         GetComponent<MeshRenderer>().material.color = Color.red;
     }
 
+    private void Animate()
+    {
+        animator.SetBool("IsJumping", isJumping);
+        animator.SetBool("IsWalking", isWalking || isRunning);
+        animator.SetBool("IsShooting", isShooting);
+    }
+
     // Command function is called from the client, but invoked on the server
     [Command]
     void CmdFire()
@@ -230,5 +263,22 @@ public class PlayerController : NetworkBehaviour
         NetworkServer.Spawn(bullet.gameObject);
 
         Destroy(bullet.gameObject, 2.0f); // destroy after 2 seconds
+    }
+
+    [Command]
+    void CmdMove(Vector3 move, float dt, Quaternion camRotation, Quaternion playerRotation)
+    {
+        RpcMove(move, dt, camRotation, playerRotation);
+    }
+
+    [ClientRpc]
+    void RpcMove(Vector3 move, float dt, Quaternion camRotation, Quaternion playerRotation)
+    {
+        //if (isLocalPlayer)
+        //    return;
+
+        characterController.Move(move * dt); // move the player   
+        transform.localRotation = camRotation; // rotate the player 
+        Camera.parent.localRotation = playerRotation; // rotate the cam
     }
 }
