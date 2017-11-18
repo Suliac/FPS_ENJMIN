@@ -3,7 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Networking;
 
-public class LifeBehaviour : NetworkBehaviour {
+public class LifeBehaviour : NetworkBehaviour
+{
 
     public const int MaxHealth = 100;
     public const float RespawnTimeSeconds = 2.0f;
@@ -19,7 +20,7 @@ public class LifeBehaviour : NetworkBehaviour {
         startPosition = GameObject.Find("StartPosition");
     }
 
-	public void TakeDamage(int amount)
+    public void TakeDamage(int amount)
     {
         if (!isServer)
             return;
@@ -27,6 +28,8 @@ public class LifeBehaviour : NetworkBehaviour {
         Health -= amount;
         if (Health <= 0)
         {
+            Health = MaxHealth;
+
             if (DestroyOnDeath)
                 Destroy(gameObject);
             else
@@ -40,7 +43,7 @@ public class LifeBehaviour : NetworkBehaviour {
         if (isLocalPlayer)
         {
             transform.position = startPosition.transform.position;
-            Health = MaxHealth;
+
             // Respawn the player after 'RespawnTime' seconds
             //StartCoroutine(Respawn(RespawnTimeSeconds));
         }
@@ -53,6 +56,5 @@ public class LifeBehaviour : NetworkBehaviour {
     //    Debug.Log("Yo !");
     //    gameObject.SetActive(true);
     //    transform.position = Vector3.zero;
-    //    Health = MaxHealth;
     //}
 }

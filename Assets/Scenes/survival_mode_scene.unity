@@ -195,41 +195,6 @@ Prefab:
       propertyPath: m_IsActive
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 4976302926097734, guid: 0b90564cfc765194ebea59b61594ff39, type: 2}
-      propertyPath: m_LocalRotation.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4976302926097734, guid: 0b90564cfc765194ebea59b61594ff39, type: 2}
-      propertyPath: m_LocalRotation.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4976302926097734, guid: 0b90564cfc765194ebea59b61594ff39, type: 2}
-      propertyPath: m_LocalRotation.z
-      value: -0.6161824
-      objectReference: {fileID: 0}
-    - target: {fileID: 4976302926097734, guid: 0b90564cfc765194ebea59b61594ff39, type: 2}
-      propertyPath: m_LocalRotation.w
-      value: 0.7876035
-      objectReference: {fileID: 0}
-    - target: {fileID: 4976302926097734, guid: 0b90564cfc765194ebea59b61594ff39, type: 2}
-      propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 114317874558886030, guid: 0b90564cfc765194ebea59b61594ff39,
-        type: 2}
-      propertyPath: m_SendInterval
-      value: 0.16666667
-      objectReference: {fileID: 0}
-    - target: {fileID: 114317874558886030, guid: 0b90564cfc765194ebea59b61594ff39,
-        type: 2}
-      propertyPath: m_TransformSyncMode
-      value: 4
-      objectReference: {fileID: 0}
-    - target: {fileID: 114317874558886030, guid: 0b90564cfc765194ebea59b61594ff39,
-        type: 2}
-      propertyPath: m_Enabled
-      value: 1
-      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 0b90564cfc765194ebea59b61594ff39, type: 2}
   m_IsPrefabParent: 0

@@ -20,9 +20,11 @@ public class Weapon
     public float RateOfFire;
     public float AnimationTimePreparation;
     public int MaxAmmo;
+    public int CurrentAmmo;
     public int Damages;
     public Transform FirePosition;
     public Transform WeaponPositionned;
+
 }
 
 public class PlayerController : NetworkBehaviour
@@ -43,10 +45,10 @@ public class PlayerController : NetworkBehaviour
     private CharacterController characterController;
     private Animator animator;
     
-    public bool isJumping = false;
-    public bool isWalking = false;
-    public bool isRunning = false;
-    public bool isShooting = false;
+    private bool isJumping = false;
+    private bool isWalking = false;
+    private bool isRunning = false;
+    private bool isShooting = false;
 
     private bool isPreviouslyGrounded = false;
     private bool wasPreviouslyShooting = false;
@@ -57,9 +59,10 @@ public class PlayerController : NetworkBehaviour
 
     private Quaternion camTargetRot;
     private Quaternion charTargetRot;
+    
     private Quaternion shootArmRot;
     private Quaternion shootLeftArmRot;
-
+    
     private Transform rightArm;
     private Transform leftArm;
     private Transform head;
@@ -90,6 +93,7 @@ public class PlayerController : NetworkBehaviour
         charTargetRot = transform.localRotation;
 
         Weapons[weaponIndex].WeaponPositionned.gameObject.SetActive(true);
+        Weapons[weaponIndex].CurrentAmmo = Weapons[weaponIndex].MaxAmmo;
 
         if (!isLocalPlayer)
         {
@@ -116,6 +120,7 @@ public class PlayerController : NetworkBehaviour
         }
 
         isPreviouslyGrounded = characterController.isGrounded;
+
     }
 
     private void FixedUpdate()
@@ -161,16 +166,15 @@ public class PlayerController : NetworkBehaviour
         head.localRotation = camTargetRot;
 
         CmdMove(moveDirection, Time.fixedDeltaTime, camTargetRot, charTargetRot);
-
-
     }
 
     private void LateUpdate()
     {
-        if (!isLocalPlayer)
-            return; // If the player isn't the player of the current client, we don't update his position
-
-        CmdLateMove(camTargetRot, shootArmRot, shootLeftArmRot);
+        if (isLocalPlayer)
+        {
+            CmdLateMove(shootArmRot, shootLeftArmRot);
+        }
+        
         if (isShooting)
         {
             rightArm.rotation *= shootArmRot;
@@ -227,9 +231,12 @@ public class PlayerController : NetworkBehaviour
 
                 if ((isFirstShoot && deltaTimeShooting >= Weapons[weaponIndex].AnimationTimePreparation) || !isFirstShoot)
                 {
-                    CmdFire();
-
-                    deltaTimeShooting -= Weapons[weaponIndex].RateOfFire;
+                    if (Weapons[weaponIndex].CurrentAmmo > 0 || Weapons[weaponIndex].MaxAmmo == -1) // NB : -1 maxammo = infinite ammo
+                    {
+                        Weapons[weaponIndex].CurrentAmmo--;
+                        CmdFire(Weapons[weaponIndex].FirePosition.position);                        
+                    }
+                    deltaTimeShooting -= isFirstShoot ? Weapons[weaponIndex].AnimationTimePreparation : Weapons[weaponIndex].RateOfFire;
                     isFirstShoot = false;
                 }
             }
@@ -237,6 +244,7 @@ public class PlayerController : NetworkBehaviour
 
         if (!Input.GetButton("Fire1") && isShooting) // juste stop shooting
         {
+            deltaTimeShooting = 0;
             isShooting = false;
             CmdSetState(State.Shooting, false);
             //animator.SetBool("IsShooting", false);
@@ -267,9 +275,9 @@ public class PlayerController : NetworkBehaviour
 
     // Command function is called from the client, but invoked on the server
     [Command]
-    void CmdFire()
+    void CmdFire(Vector3 firePosition)
     {
-        var bullet = Instantiate(Bullet, Weapons[weaponIndex].FirePosition.position, Quaternion.identity);
+        var bullet = Instantiate(Bullet, firePosition, Quaternion.identity);
 
         bullet.GetComponent<Rigidbody>().velocity = Camera.transform.forward * 40;
         //bullet.GetComponent<Rigidbody>().AddForce(Camera.transform.forward * 40, ForceMode.Impulse);
@@ -287,24 +295,12 @@ public class PlayerController : NetworkBehaviour
     }
 
     [Command]
-    void CmdLateMove(Quaternion camRotation, Quaternion rightArmRotation, Quaternion leftArmRotation)
+    void CmdLateMove(Quaternion rightArmRotation, Quaternion leftArmRotation)
     {
-        RpcLateMove(camRotation, rightArmRotation, leftArmRotation);
+        RpcLateMove(rightArmRotation, leftArmRotation);
+        
     }
-
-    [ClientRpc]
-    void RpcLateMove(Quaternion camRotation, Quaternion rightArmRotation, Quaternion leftArmRotation)
-    {
-        if (isLocalPlayer)
-            return;
-
-        if (isShooting)
-        {
-            rightArm.rotation *= rightArmRotation;
-            leftArm.rotation *= leftArmRotation;
-        }
-    }
-
+    
     [ClientRpc]
     void RpcMove(Vector3 move, float dt, Quaternion camRotation, Quaternion playerRotation)
     {
@@ -313,8 +309,25 @@ public class PlayerController : NetworkBehaviour
 
         characterController.Move(move * dt); // move the player   
         transform.localRotation = playerRotation; // rotate the player 
+        Camera.localRotation = camRotation;
         head.localRotation = camRotation;// rotate the head
     } 
+
+    [ClientRpc]
+    void RpcLateMove(Quaternion rightArmRotation, Quaternion leftArmRotation)
+    {
+        if (isLocalPlayer)
+            return;
+
+        shootArmRot = rightArmRotation;
+        shootLeftArmRot = leftArmRotation;
+
+        //if (isShooting)
+        //{
+        //    rightArm.rotation *= rightArmRotation;
+        //    leftArm.rotation *= leftArmRotation;
+        //}
+    }
     #endregion
 
     #region State
