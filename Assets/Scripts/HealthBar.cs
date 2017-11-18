@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class HealthBar : MonoBehaviour
 {
-
+    public Camera PlayerCamera;
     GUIStyle healthStyle;
     GUIStyle backStyle;
     LifeBehaviour lifeB;
@@ -20,7 +20,7 @@ public class HealthBar : MonoBehaviour
         InitStyles();
 
         //////////////////  Draw a HealthBar
-        Vector3 posBar = Camera.main.WorldToScreenPoint(transform.position);
+        Vector3 posBar = PlayerCamera.WorldToScreenPoint(transform.position);
 
         // Draw background
         GUI.color = Color.grey;
