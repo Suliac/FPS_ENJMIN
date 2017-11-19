@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Networking;
+using UnityEngine.UI;
 
 public enum State
 {
@@ -44,7 +45,11 @@ public class PlayerController : NetworkBehaviour
 
     private CharacterController characterController;
     private Animator animator;
-    
+    private LifeBehaviour lifeScript;
+
+    private Text UiHealth;
+    private Text UiAmmo;
+
     private bool isJumping = false;
     private bool isWalking = false;
     private bool isRunning = false;
@@ -59,10 +64,10 @@ public class PlayerController : NetworkBehaviour
 
     private Quaternion camTargetRot;
     private Quaternion charTargetRot;
-    
+
     private Quaternion shootArmRot;
     private Quaternion shootLeftArmRot;
-    
+
     private Transform rightArm;
     private Transform leftArm;
     private Transform head;
@@ -79,6 +84,7 @@ public class PlayerController : NetworkBehaviour
 
         characterController = GetComponent<CharacterController>();
         animator = GetComponentInChildren<Animator>();
+        lifeScript = GetComponent<LifeBehaviour>();
     }
 
     // Use this for initialization
@@ -94,10 +100,20 @@ public class PlayerController : NetworkBehaviour
 
         Weapons[weaponIndex].WeaponPositionned.gameObject.SetActive(true);
         Weapons[weaponIndex].CurrentAmmo = Weapons[weaponIndex].MaxAmmo;
-
+        
         if (!isLocalPlayer)
         {
             Camera.gameObject.SetActive(false);
+        }
+        else
+        {
+            GameInfoHandler.PlayerUi.SetActive(true);
+
+            UiAmmo = GameObject.Find("Ammo_Text").GetComponent<Text>();
+            UiHealth = GameObject.Find("Life_Text").GetComponent<Text>();
+
+            GameInfoHandler.InfiniteAmmoImage.SetActive(Weapons[weaponIndex].CurrentAmmo < 0);
+            UiAmmo.gameObject.SetActive(Weapons[weaponIndex].CurrentAmmo >= 0);
         }
     }
 
@@ -108,6 +124,8 @@ public class PlayerController : NetworkBehaviour
 
         if (!isLocalPlayer)
             return; // If the player isn't the player of the current client, we don't update his position
+
+        UpdateUi();
 
         if (!isPreviouslyGrounded && characterController.isGrounded)
         {
@@ -174,7 +192,7 @@ public class PlayerController : NetworkBehaviour
         {
             CmdLateMove(shootArmRot, shootLeftArmRot);
         }
-        
+
         if (isShooting)
         {
             rightArm.rotation *= shootArmRot;
@@ -234,7 +252,7 @@ public class PlayerController : NetworkBehaviour
                     if (Weapons[weaponIndex].CurrentAmmo > 0 || Weapons[weaponIndex].MaxAmmo == -1) // NB : -1 maxammo = infinite ammo
                     {
                         Weapons[weaponIndex].CurrentAmmo--;
-                        CmdFire(Weapons[weaponIndex].FirePosition.position);                        
+                        CmdFire(Weapons[weaponIndex].FirePosition.position);
                     }
                     deltaTimeShooting -= isFirstShoot ? Weapons[weaponIndex].AnimationTimePreparation : Weapons[weaponIndex].RateOfFire;
                     isFirstShoot = false;
@@ -259,11 +277,6 @@ public class PlayerController : NetworkBehaviour
         }
     }
 
-    public override void OnStartLocalPlayer()
-    {
-        GetComponent<MeshRenderer>().material.color = Color.red;
-    }
-
     void Animate()
     {
         animator.SetBool("IsJumping", isJumping);
@@ -272,7 +285,20 @@ public class PlayerController : NetworkBehaviour
 
     }
 
+    private void UpdateUi()
+    {
+        if (!isLocalPlayer || lifeScript == null)
+            return;
+        
+        if (UiHealth != null)
+            UiHealth.text = lifeScript.Health.ToString();
 
+        if (UiAmmo != null)
+            UiAmmo.text = Weapons[weaponIndex].CurrentAmmo.ToString();
+               
+    }
+
+    #region Commands & RPC Methods
     // Command function is called from the client, but invoked on the server
     [Command]
     void CmdFire(Vector3 firePosition)
@@ -298,9 +324,9 @@ public class PlayerController : NetworkBehaviour
     void CmdLateMove(Quaternion rightArmRotation, Quaternion leftArmRotation)
     {
         RpcLateMove(rightArmRotation, leftArmRotation);
-        
+
     }
-    
+
     [ClientRpc]
     void RpcMove(Vector3 move, float dt, Quaternion camRotation, Quaternion playerRotation)
     {
@@ -311,7 +337,7 @@ public class PlayerController : NetworkBehaviour
         transform.localRotation = playerRotation; // rotate the player 
         Camera.localRotation = camRotation;
         head.localRotation = camRotation;// rotate the head
-    } 
+    }
 
     [ClientRpc]
     void RpcLateMove(Quaternion rightArmRotation, Quaternion leftArmRotation)
@@ -389,5 +415,24 @@ public class PlayerController : NetworkBehaviour
         }
     }
 
+    #endregion 
     #endregion
+
+    void OnApplicationFocus(bool hasFocus)
+    {
+        if (!hasFocus)
+        {
+            Cursor.lockState = CursorLockMode.None;
+            Cursor.visible = true;
+        }
+        else
+        {
+            Cursor.lockState = CursorLockMode.Locked;
+            Cursor.visible = false;
+        }
+    }
+    
+    public override void OnStartLocalPlayer()
+    {
+    }
 }

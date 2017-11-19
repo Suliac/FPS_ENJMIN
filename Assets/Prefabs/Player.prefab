@@ -553,7 +553,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1828227327048638}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 1.16, y: 0.646, z: 0}
+  m_LocalPosition: {x: 1, y: 0.646, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 4662307149743234}
@@ -1602,7 +1602,8 @@ MonoBehaviour:
   - Name: Gun
     RateOfFire: 0.5
     AnimationTimePreparation: 1
-    MaxAmmo: 10
+    MaxAmmo: -1
+    CurrentAmmo: 0
     Damages: 10
     FirePosition: {fileID: 4585518149807054}
     WeaponPositionned: {fileID: 4641193491751756}
@@ -1610,6 +1611,7 @@ MonoBehaviour:
     RateOfFire: 1
     AnimationTimePreparation: 0
     MaxAmmo: 100
+    CurrentAmmo: 0
     Damages: 15
     FirePosition: {fileID: 0}
     WeaponPositionned: {fileID: 0}
@@ -1617,6 +1619,7 @@ MonoBehaviour:
     RateOfFire: 0
     AnimationTimePreparation: 0
     MaxAmmo: 0
+    CurrentAmmo: 0
     Damages: 0
     FirePosition: {fileID: 0}
     WeaponPositionned: {fileID: 0}
