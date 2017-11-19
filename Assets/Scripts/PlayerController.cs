@@ -36,24 +36,19 @@ public class PlayerController : NetworkBehaviour
 
     public Transform Bullet;
     public Transform Camera;
-    
-    [Header("Gameplay")]
-    public float BulletSpeed = 100.0f;
     public float JumpSpeed = 10.0f;
     public float WalkSpeed = 5.0f;
     public float RunSpeed = 10.0f;
-
-    [Header("Mouse")]
     public float XSensitivity = 2.0f;
     public float YSensitivity = 2.0f;
     public float GravityMultiplier = 2.0f;
 
-    private Text UiAmmo;
-    private Text UiHealth;
-
     private CharacterController characterController;
     private Animator animator;
     private LifeBehaviour lifeScript;
+
+    private Text UiHealth;
+    private Text UiAmmo;
 
     private bool isJumping = false;
     private bool isWalking = false;
@@ -77,7 +72,6 @@ public class PlayerController : NetworkBehaviour
     private Transform leftArm;
     private Transform head;
 
-
     void Awake()
     {
         //rightArm = GameObject.Find("RightArmDummy").transform;
@@ -87,10 +81,10 @@ public class PlayerController : NetworkBehaviour
         rightArm = transform.GetChild(0).GetChild(0).GetChild(4); // Crado mais fonctionne
         leftArm = transform.GetChild(0).GetChild(0).GetChild(5); // Crado mais fonctionne
 
-        lifeScript = GetComponent<LifeBehaviour>();
+
         characterController = GetComponent<CharacterController>();
         animator = GetComponentInChildren<Animator>();
-        
+        lifeScript = GetComponent<LifeBehaviour>();
     }
 
     // Use this for initialization
@@ -106,15 +100,20 @@ public class PlayerController : NetworkBehaviour
 
         Weapons[weaponIndex].WeaponPositionned.gameObject.SetActive(true);
         Weapons[weaponIndex].CurrentAmmo = Weapons[weaponIndex].MaxAmmo;
-
+        
         if (!isLocalPlayer)
         {
             Camera.gameObject.SetActive(false);
         }
         else
         {
-            UiAmmo = GameObject.Find("Ammo_Number").GetComponent<Text>();
-            UiHealth = GameObject.Find("Health_Number").GetComponent<Text>();
+            GameInfoHandler.PlayerUi.SetActive(true);
+
+            UiAmmo = GameObject.Find("Ammo_Text").GetComponent<Text>();
+            UiHealth = GameObject.Find("Life_Text").GetComponent<Text>();
+
+            GameInfoHandler.InfiniteAmmoImage.SetActive(Weapons[weaponIndex].CurrentAmmo < 0);
+            UiAmmo.gameObject.SetActive(Weapons[weaponIndex].CurrentAmmo >= 0);
         }
     }
 
@@ -278,11 +277,6 @@ public class PlayerController : NetworkBehaviour
         }
     }
 
-    public override void OnStartLocalPlayer()
-    {
-        GameInfoHandler.PlayerUi.SetActive(true);
-    }
-
     void Animate()
     {
         animator.SetBool("IsJumping", isJumping);
@@ -291,25 +285,27 @@ public class PlayerController : NetworkBehaviour
 
     }
 
-    void UpdateUi()
+    private void UpdateUi()
     {
-        if (!isLocalPlayer)
+        if (!isLocalPlayer || lifeScript == null)
             return;
+        
+        if (UiHealth != null)
+            UiHealth.text = lifeScript.Health.ToString();
 
-        UiHealth.text = lifeScript.Health.ToString();
-        UiAmmo.text = Weapons[weaponIndex].CurrentAmmo.ToString();
-
-        GameInfoHandler.InfiniteAmmoImage.SetActive(Weapons[weaponIndex].CurrentAmmo < 0);
-        UiAmmo.gameObject.SetActive(Weapons[weaponIndex].CurrentAmmo >= 0);
+        if (UiAmmo != null)
+            UiAmmo.text = Weapons[weaponIndex].CurrentAmmo.ToString();
+               
     }
 
+    #region Commands & RPC Methods
     // Command function is called from the client, but invoked on the server
     [Command]
     void CmdFire(Vector3 firePosition)
     {
         var bullet = Instantiate(Bullet, firePosition, Quaternion.identity);
 
-        bullet.GetComponent<Rigidbody>().velocity = Camera.transform.forward * BulletSpeed;
+        bullet.GetComponent<Rigidbody>().velocity = Camera.transform.forward * 40;
         //bullet.GetComponent<Rigidbody>().AddForce(Camera.transform.forward * 40, ForceMode.Impulse);
 
         NetworkServer.Spawn(bullet.gameObject);
@@ -419,6 +415,7 @@ public class PlayerController : NetworkBehaviour
         }
     }
 
+    #endregion 
     #endregion
 
     void OnApplicationFocus(bool hasFocus)
@@ -433,5 +430,9 @@ public class PlayerController : NetworkBehaviour
             Cursor.lockState = CursorLockMode.Locked;
             Cursor.visible = false;
         }
+    }
+    
+    public override void OnStartLocalPlayer()
+    {
     }
 }

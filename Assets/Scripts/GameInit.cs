@@ -3,11 +3,12 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class GameInit : MonoBehaviour {
-    
+
+	// Use this for initialization
 	void Start () {
-        Debug.Log("start");
-        GameInfoHandler.PlayerUi.SetActive(false);
-        GameInfoHandler.InfiniteAmmoImage.SetActive(false);
+        GameInfoHandler.PlayerUi.SetActive(false); // We don't want our UI to appear when we are in the lobby screen
+
 	}
+	
 	
 }

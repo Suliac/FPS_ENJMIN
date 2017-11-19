@@ -17,6 +17,9 @@ public class HealthBar : MonoBehaviour
 
     void OnGUI()
     {
+        if (lifeB.isLocalPlayer)
+            return;
+
         InitStyles();
 
         //////////////////  Draw a HealthBar
