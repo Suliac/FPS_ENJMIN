@@ -19,6 +19,7 @@ public enum State
 public class Weapon
 {
     public string Name;
+    public int Id;
     public float RateOfFire;
     public float AnimationTimePreparation;
     public int MaxAmmo;
@@ -36,7 +37,7 @@ public class Weapon
 public class PlayerController : NetworkBehaviour
 {
     public List<Weapon> WeaponsAvailable;
-    //private List<Weapon> currentWeapons;
+    private List<Weapon> currentWeapons;
     private int weaponIndex = 0;
     private int nextWeaponWanted = 0;
     private float deltaTimeShooting = 0.0f;
@@ -88,7 +89,7 @@ public class PlayerController : NetworkBehaviour
         animator = GetComponentInChildren<Animator>();
         lifeScript = GetComponent<LifeBehaviour>();
 
-        //currentWeapons = new List<Weapon>();
+        currentWeapons = new List<Weapon>();
     }
 
     // Use this for initialization
@@ -123,7 +124,7 @@ public class PlayerController : NetworkBehaviour
             WeaponsAvailable[i].WeaponPositionned.gameObject.SetActive(false);
         }
 
-        //currentWeapons.AddRange(WeaponsAvailable.Where(w => w.UnlockedByDefault));
+        currentWeapons.AddRange(WeaponsAvailable.Where(w => w.UnlockedByDefault));
     }
 
     // Update is called once per frame
@@ -251,20 +252,20 @@ public class PlayerController : NetworkBehaviour
             isShooting = true;
             CmdSetState(State.Shooting, true);
 
-            if (WeaponsAvailable.Any() && deltaTimeShooting >= WeaponsAvailable[weaponIndex].RateOfFire)
+            if (currentWeapons.Any() && deltaTimeShooting >= currentWeapons[weaponIndex].RateOfFire)
             {
                 //animator.SetBool("IsShooting", true);
                 if (isShooting && !wasPreviouslyShooting)
                     isFirstShoot = true;
 
-                if ((isFirstShoot && deltaTimeShooting >= WeaponsAvailable[weaponIndex].AnimationTimePreparation) || !isFirstShoot)
+                if ((isFirstShoot && deltaTimeShooting >= currentWeapons[weaponIndex].AnimationTimePreparation) || !isFirstShoot)
                 {
-                    if (WeaponsAvailable[weaponIndex].CurrentAmmo > 0 || WeaponsAvailable[weaponIndex].MaxAmmo == -1) // NB : -1 maxammo = infinite ammo
+                    if (currentWeapons[weaponIndex].CurrentAmmo > 0 || currentWeapons[weaponIndex].MaxAmmo == -1) // NB : -1 maxammo = infinite ammo
                     {
-                        WeaponsAvailable[weaponIndex].CurrentAmmo--;
-                        CmdFire(weaponIndex, WeaponsAvailable[weaponIndex].FirePosition.position);
+                        currentWeapons[weaponIndex].CurrentAmmo--;
+                        CmdFire(weaponIndex, currentWeapons[weaponIndex].FirePosition.position);
                     }
-                    deltaTimeShooting -= isFirstShoot ? WeaponsAvailable[weaponIndex].AnimationTimePreparation : WeaponsAvailable[weaponIndex].RateOfFire;
+                    deltaTimeShooting -= isFirstShoot ? currentWeapons[weaponIndex].AnimationTimePreparation : currentWeapons[weaponIndex].RateOfFire;
                     isFirstShoot = false;
                 }
             }
@@ -292,7 +293,7 @@ public class PlayerController : NetworkBehaviour
         }
     }
 
-    void Animate()
+    private void Animate()
     {
         animator.SetBool("IsJumping", isJumping);
         animator.SetBool("IsWalking", isWalking || isRunning);
@@ -310,29 +311,29 @@ public class PlayerController : NetworkBehaviour
             UiHealth.text = lifeScript.Health.ToString();
 
         if (UiAmmo != null)
-            UiAmmo.text = WeaponsAvailable.Any() ? WeaponsAvailable[weaponIndex].CurrentAmmo.ToString() : "ERROR";
+            UiAmmo.text = currentWeapons.Any() ? currentWeapons[weaponIndex].CurrentAmmo.ToString() : "ERROR";
 
     }
 
     private void ChangeWeapon()
     {
 
-        if (weaponIndex != nextWeaponWanted && WeaponsAvailable.Any())
+        if (weaponIndex != nextWeaponWanted && currentWeapons.Any())
         {
-            if (nextWeaponWanted >= WeaponsAvailable.Count)
+            if (nextWeaponWanted >= currentWeapons.Count)
                 nextWeaponWanted = 0;
 
             if (nextWeaponWanted < 0)
-                nextWeaponWanted = WeaponsAvailable.Count - 1;
+                nextWeaponWanted = currentWeapons.Count - 1;
 
             if (nextWeaponWanted != weaponIndex)
             {
                 if (weaponIndex >= 0) // NB -> Init : weapon index = -1
-                    WeaponsAvailable[weaponIndex].WeaponPositionned.gameObject.SetActive(false); // disable current weapon 
+                    currentWeapons[weaponIndex].WeaponPositionned.gameObject.SetActive(false); // disable current weapon 
 
-                WeaponsAvailable[nextWeaponWanted].WeaponPositionned.gameObject.SetActive(true); // active wanted weapon
+                currentWeapons[nextWeaponWanted].WeaponPositionned.gameObject.SetActive(true); // active wanted weapon
 
-                if (WeaponsAvailable[nextWeaponWanted].CurrentAmmo < 0)
+                if (currentWeapons[nextWeaponWanted].CurrentAmmo < 0)
                 {
                     GameInfoHandler.InfiniteAmmoImage.SetActive(true);
                     UiAmmo.gameObject.SetActive(false);
@@ -344,10 +345,31 @@ public class PlayerController : NetworkBehaviour
                 }
             }
 
-            CmdChangeWeapon(nextWeaponWanted,weaponIndex);
+            CmdChangeWeapon(nextWeaponWanted, weaponIndex);
             weaponIndex = nextWeaponWanted;
             animator.SetInteger("CurrentWeapon", weaponIndex);
         }
+    }
+
+    public void NewWeapon(int idWeapon)
+    {
+        if (idWeapon < 0 || idWeapon >= WeaponsAvailable.Count)
+            return;
+
+        Weapon weaponToUnlock = WeaponsAvailable.FirstOrDefault(w => w.Id == idWeapon);
+        if (weaponToUnlock == null)
+            return;
+
+       Weapon current = currentWeapons.FirstOrDefault(w => w.Id == idWeapon);
+
+        if (current == null)
+        {
+            current = weaponToUnlock;
+            currentWeapons.Add(current);
+            currentWeapons = currentWeapons.OrderBy(w => w.Id).ToList();
+        }
+
+        current.CurrentAmmo = current.MaxAmmo;
     }
 
     #region Commands & RPC Methods
@@ -355,7 +377,7 @@ public class PlayerController : NetworkBehaviour
     [Command]
     void CmdFire(int weaponIndex, Vector3 firePosition)
     {
-        var weapon = WeaponsAvailable[weaponIndex];
+        var weapon = currentWeapons[weaponIndex];
 
         var bullet = Instantiate(weapon.Bullet, firePosition, Quaternion.identity);
 
@@ -483,9 +505,9 @@ public class PlayerController : NetworkBehaviour
             return;
 
         if (previousIndexWeapon >= 0) // NB -> Init : weapon index = -1
-            WeaponsAvailable[previousIndexWeapon].WeaponPositionned.gameObject.SetActive(false); // disable current weapon 
+            currentWeapons[previousIndexWeapon].WeaponPositionned.gameObject.SetActive(false); // disable current weapon 
 
-        WeaponsAvailable[newIndexWeapon].WeaponPositionned.gameObject.SetActive(true); // active wanted weapon
+        currentWeapons[newIndexWeapon].WeaponPositionned.gameObject.SetActive(true); // active wanted weapon
 
         animator.SetInteger("CurrentWeapon", newIndexWeapon);
         weaponIndex = newIndexWeapon;

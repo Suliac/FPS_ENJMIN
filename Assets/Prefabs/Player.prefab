@@ -1672,6 +1672,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   WeaponsAvailable:
   - Name: Gun
+    Id: 0
     RateOfFire: 0.5
     AnimationTimePreparation: 1
     MaxAmmo: -1
@@ -1685,6 +1686,7 @@ MonoBehaviour:
     Bullet: {fileID: 4827852814499640, guid: 0be9e9692d1a3a74eac5b5109d71f1d0, type: 2}
     UnlockedByDefault: 1
   - Name: Riflegun
+    Id: 1
     RateOfFire: 0.1
     AnimationTimePreparation: 0.1
     MaxAmmo: 200
@@ -1696,7 +1698,7 @@ MonoBehaviour:
     FirePosition: {fileID: 4585518149807054}
     WeaponPositionned: {fileID: 4086922958085438}
     Bullet: {fileID: 4827852814499640, guid: 0be9e9692d1a3a74eac5b5109d71f1d0, type: 2}
-    UnlockedByDefault: 1
+    UnlockedByDefault: 0
   Camera: {fileID: 4662307149743234}
   JumpSpeed: 10
   WalkSpeed: 5
@@ -1710,7 +1712,7 @@ MonoBehaviour:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1468598360545164}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: b6ad84ca2f3560d469fe90d3a704a747, type: 3}
   m_Name: 
