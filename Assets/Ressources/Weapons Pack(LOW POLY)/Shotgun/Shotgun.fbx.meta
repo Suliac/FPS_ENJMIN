@@ -12,10 +12,34 @@ timeCreated: 18446744011573954816
 ModelImporter:
   serializedVersion: 22
   fileIDToRecycleName:
+    100000: Pump_Loader
+    100002: //RootNode
+    100004: Shotgun_Shell
+    400000: Pump_Loader
+    400002: //RootNode
+    400004: Shotgun_Shell
+    2300000: Pump_Loader
+    2300002: //RootNode
+    2300004: Shotgun_Shell
+    3300000: Pump_Loader
+    3300002: //RootNode
+    3300004: Shotgun_Shell
     4300000: Gun
     4300002: Pump_Loader
     4300004: Shotgun_Shell
-  externalObjects: {}
+    7400000: Reload
+    11100000: //RootNode
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Rocket_Shell_Shotgun_Shell_Material
+    second: {fileID: 2100000, guid: 18fb3b42959690e468071fc9e2bae816, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: ShotGun_material
+    second: {fileID: 2100000, guid: 5027a9c27d7fe144e825fe061f064fae, type: 2}
   materials:
     importMaterials: 1
     materialName: 0

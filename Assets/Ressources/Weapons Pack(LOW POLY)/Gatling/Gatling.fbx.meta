@@ -12,10 +12,39 @@ timeCreated: 18446744011573954816
 ModelImporter:
   serializedVersion: 22
   fileIDToRecycleName:
+    100000: Barrels
+    100002: //RootNode
+    100004: Gatling_Shell
+    400000: Barrels
+    400002: //RootNode
+    400004: Gatling_Shell
+    2300000: Barrels
+    2300002: //RootNode
+    2300004: Gatling_Shell
+    3300000: Barrels
+    3300002: //RootNode
+    3300004: Gatling_Shell
     4300000: Gun
     4300002: Barrels
     4300004: Gatling_Shell
-  externalObjects: {}
+    7400000: Shoot
+    11100000: //RootNode
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Barrel_material
+    second: {fileID: 2100000, guid: 135a19eaa0a1f8d48990f8c57eee801b, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Gun_Material
+    second: {fileID: 2100000, guid: 135a19eaa0a1f8d48990f8c57eee801b, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Rocket_Shell_Shell
+    second: {fileID: 2100000, guid: 5e3bdc62d5e7fdf4a8ba4842ffb97d6c, type: 2}
   materials:
     importMaterials: 1
     materialName: 0

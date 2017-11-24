@@ -15,11 +15,39 @@ timeCreated: 18446744011573954816
 ModelImporter:
   serializedVersion: 22
   fileIDToRecycleName:
+    100000: Barrett_Magazine
+    100002: //RootNode
+    100004: Lever
+    100006: M107_Shell
+    400000: Barrett_Magazine
+    400002: //RootNode
+    400004: Lever
+    400006: M107_Shell
+    2300000: Barrett_Magazine
+    2300002: //RootNode
+    2300004: Lever
+    2300006: M107_Shell
+    3300000: Barrett_Magazine
+    3300002: //RootNode
+    3300004: Lever
+    3300006: M107_Shell
     4300000: BarrettM107
     4300002: Barrett_Magazine
     4300004: Lever
     4300006: M107_Shell
-  externalObjects: {}
+    7400000: Shoot
+    11100000: //RootNode
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: BarrettM107_material
+    second: {fileID: 2100000, guid: 9f335a0520ac2b341908b4c4e3ffc49b, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Rocket_Shell1_Shell
+    second: {fileID: 2100000, guid: 0822ad69e59b8884c82e8d8ad104e76e, type: 2}
   materials:
     importMaterials: 1
     materialName: 0

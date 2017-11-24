@@ -12,10 +12,34 @@ timeCreated: 18446744011573954816
 ModelImporter:
   serializedVersion: 22
   fileIDToRecycleName:
+    100000: //RootNode
+    100002: AK_47_Magazine
+    100004: Ak_47_Shell
+    400000: //RootNode
+    400002: AK_47_Magazine
+    400004: Ak_47_Shell
+    2300000: //RootNode
+    2300002: AK_47_Magazine
+    2300004: Ak_47_Shell
+    3300000: //RootNode
+    3300002: AK_47_Magazine
+    3300004: Ak_47_Shell
     4300000: AK_47
     4300002: AK_47_Magazine
     4300004: Ak_47_Shell
-  externalObjects: {}
+    7400000: Shoot
+    11100000: //RootNode
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: AK_47_Material
+    second: {fileID: 2100000, guid: de1f287eaa7164e47949f163c819203c, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Rocket_Shell_Shell
+    second: {fileID: 2100000, guid: 2cdd7a5151d5bb4448b210f4a099236b, type: 2}
   materials:
     importMaterials: 1
     materialName: 0

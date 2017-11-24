@@ -353,6 +353,15 @@ public class PlayerController : NetworkBehaviour
 
     public void NewWeapon(int idWeapon)
     {
+        if (!isServer)
+            return;
+
+        RpcNewWeapon(idWeapon);
+    }
+
+    [ClientRpc]
+    public void RpcNewWeapon(int idWeapon)
+    {
         if (idWeapon < 0 || idWeapon >= WeaponsAvailable.Count)
             return;
 
@@ -360,7 +369,7 @@ public class PlayerController : NetworkBehaviour
         if (weaponToUnlock == null)
             return;
 
-       Weapon current = currentWeapons.FirstOrDefault(w => w.Id == idWeapon);
+        Weapon current = currentWeapons.FirstOrDefault(w => w.Id == idWeapon);
 
         if (current == null)
         {
@@ -531,5 +540,8 @@ public class PlayerController : NetworkBehaviour
 
     public override void OnStartLocalPlayer()
     {
+        GameInfoHandler.GameStarted = true;
+
+        //Debug.Log(GameInfoHandler.GameStarted);
     }
 }

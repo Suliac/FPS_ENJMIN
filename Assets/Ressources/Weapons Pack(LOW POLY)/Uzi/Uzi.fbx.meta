@@ -12,9 +12,29 @@ timeCreated: 18446744011573954816
 ModelImporter:
   serializedVersion: 22
   fileIDToRecycleName:
+    100000: //RootNode
+    100002: Uzi_Shell
+    400000: //RootNode
+    400002: Uzi_Shell
+    2300000: //RootNode
+    2300002: Uzi_Shell
+    3300000: //RootNode
+    3300002: Uzi_Shell
     4300000: Uzi
     4300002: Uzi_Shell
-  externalObjects: {}
+    7400000: Shoot
+    11100000: //RootNode
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Rocket_Shell_Shell
+    second: {fileID: 2100000, guid: 10a633f096f98c149af33bc1859670df, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Uzi_Material
+    second: {fileID: 2100000, guid: 0f65e620a4962c343b6cbf1fc092954c, type: 2}
   materials:
     importMaterials: 1
     materialName: 0
