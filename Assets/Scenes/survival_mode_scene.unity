@@ -568,8 +568,8 @@ MonoBehaviour:
   m_OnlineScene: 
   m_SpawnPrefabs:
   - {fileID: 1481785109836986, guid: 0be9e9692d1a3a74eac5b5109d71f1d0, type: 2}
-  - {fileID: 1709200518645172, guid: 69f0721a01989364da135e31c85cb532, type: 2}
   - {fileID: 1481785109836986, guid: c9778bef313c9524b8c48acd3a36c502, type: 2}
+  - {fileID: 1709200518645172, guid: 69f0721a01989364da135e31c85cb532, type: 2}
   m_CustomConfig: 0
   m_MaxConnections: 4
   m_ConnectionConfig:
@@ -651,7 +651,87 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   IpAddress: localhost
   Port: 5555
-  GuiOffset: 0
+  PlayerName: YourNameHere
+  ButtonWidth: 100
+  ButtonHeight: 30
+  TextBoxWidth: 200
+  TextBoxHeight: 30
+  LabelWidth: 275
+  LabelHeight: 30
+--- !u!1 &801095545
+GameObject:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  serializedVersion: 5
+  m_Component:
+  - component: {fileID: 801095548}
+  - component: {fileID: 801095547}
+  - component: {fileID: 801095546}
+  m_Layer: 0
+  m_Name: GameManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &801095546
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 801095545}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fad5dc80e620a8242984576122451062, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  FragToWin: 1
+--- !u!114 &801095547
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 801095545}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 372142912, guid: dc443db3e92b4983b9738c1131f555cb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_SceneId:
+    m_Value: 0
+  m_AssetId:
+    i0: 0
+    i1: 0
+    i2: 0
+    i3: 0
+    i4: 0
+    i5: 0
+    i6: 0
+    i7: 0
+    i8: 0
+    i9: 0
+    i10: 0
+    i11: 0
+    i12: 0
+    i13: 0
+    i14: 0
+    i15: 0
+  m_ServerOnly: 1
+  m_LocalPlayerAuthority: 0
+--- !u!4 &801095548
+Transform:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 801095545}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 78.401505, y: 5.2, z: -42.899284}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 13
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &828485787
 GameObject:
   m_ObjectHideFlags: 0
@@ -726,47 +806,13 @@ GameObject:
   m_Component:
   - component: {fileID: 913044714}
   - component: {fileID: 913044715}
-  - component: {fileID: 913044716}
-  - component: {fileID: 913044713}
   m_Layer: 0
-  m_Name: GameHandler
+  m_Name: GameInfoHandler
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &913044713
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 913044712}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 372142912, guid: dc443db3e92b4983b9738c1131f555cb, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_SceneId:
-    m_Value: 0
-  m_AssetId:
-    i0: 0
-    i1: 0
-    i2: 0
-    i3: 0
-    i4: 0
-    i5: 0
-    i6: 0
-    i7: 0
-    i8: 0
-    i9: 0
-    i10: 0
-    i11: 0
-    i12: 0
-    i13: 0
-    i14: 0
-    i15: 0
-  m_ServerOnly: 1
-  m_LocalPlayerAuthority: 0
 --- !u!4 &913044714
 Transform:
   m_ObjectHideFlags: 0
@@ -792,21 +838,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _GameStarted: 0
+  _GamePaused: 0
+  _PlayerName: 
   _NumberPickup: 0
   _PlayerUi: {fileID: 1347192538}
   _InfiniteAmmoImage: {fileID: 223899534}
---- !u!114 &913044716
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 913044712}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fad5dc80e620a8242984576122451062, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  FragToWin: 20
+  _AmmoText: {fileID: 2032661011}
 --- !u!1 &1250039285
 GameObject:
   m_ObjectHideFlags: 0

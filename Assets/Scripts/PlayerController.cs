@@ -37,6 +37,8 @@ public class Weapon
 public class PlayerController : NetworkBehaviour
 {
     public string PlayerId;
+    private int currentFrags = 0;
+    private Dictionary<string, int> frags = new Dictionary<string, int>();
 
     public List<Weapon> WeaponsAvailable;
     private List<Weapon> currentWeapons;
@@ -80,6 +82,8 @@ public class PlayerController : NetworkBehaviour
     private Transform rightArm;
     private Transform leftArm;
     private Transform head;
+
+    //private bool gamePaused = false;
 
     void Awake()
     {
@@ -136,6 +140,22 @@ public class PlayerController : NetworkBehaviour
 
         if (!isLocalPlayer)
             return; // If the player isn't the player of the current client, we don't update his position
+        
+
+        if (currentFrags > 0)
+        {
+            Debug.Log("WAOW");
+        }
+
+        if (Input.anyKey && Input.GetKeyDown(KeyCode.Escape))
+        {
+            Cursor.lockState = CursorLockMode.None;
+            Cursor.visible = true;
+
+            GameInfoHandler.GamePaused = true;
+            //Debug.Log("gamePaused");
+        }
+
 
         ChangeWeapon();
         UpdateUi();
@@ -159,8 +179,13 @@ public class PlayerController : NetworkBehaviour
         if (!isLocalPlayer)
             return; // If the player isn't the player of the current client, we don't update his position
 
-        float speed;
-        GetInput(out speed);
+
+        float speed = 0.0f;
+
+        if (!GameInfoHandler.GamePaused)
+        {
+            GetInput(out speed);
+        }
         // always move along the camera forward as it is the direction that it being aimed at
         Vector3 desiredMove = transform.forward * input.y + transform.right * input.x;
 
@@ -197,6 +222,7 @@ public class PlayerController : NetworkBehaviour
         head.localRotation = camTargetRot;
 
         CmdMove(moveDirection, Time.fixedDeltaTime, camTargetRot, charTargetRot);
+
     }
 
     private void LateUpdate()
@@ -413,7 +439,7 @@ public class PlayerController : NetworkBehaviour
         var bullet = Instantiate(weapon.Bullet, firePosition, Quaternion.identity);
 
         bullet.GetComponent<Rigidbody>().velocity = Camera.transform.forward * weapon.BulletSpeed;
-        bullet.GetComponent<BulletBehaviour>().SetDamage(weapon.Damages);
+        bullet.GetComponent<BulletBehaviour>().Init(weapon.Damages, PlayerId);
         NetworkServer.Spawn(bullet.gameObject);
 
         Destroy(bullet.gameObject, weapon.DestroyBulletAfterSeconds);
@@ -552,18 +578,62 @@ public class PlayerController : NetworkBehaviour
         {
             Cursor.lockState = CursorLockMode.None;
             Cursor.visible = true;
+            GameInfoHandler.GamePaused = true;
         }
         else
         {
-            Cursor.lockState = CursorLockMode.Locked;
-            Cursor.visible = false;
+            if (GameInfoHandler.GamePaused)
+            {
+                Cursor.lockState = CursorLockMode.None;
+                Cursor.visible = true;
+            }
         }
+    }
+
+    [Command]
+    void CmdNewPlayer(string playerName)
+    {
+        PlayerId = playerName;
+        InGameManager.NewPlayer(playerName);
+        InGameManager.SubscribeToScoreUpdates(this);
+    }
+
+    [Command]
+    public void CmdUpdateScores()
+    {
+        frags = InGameManager.fragPerPlayer;
+
+        foreach (var pair in frags)
+        {
+            if (PlayerId == pair.Key)
+                currentFrags = pair.Value;
+
+            RpcUpdateScores(pair.Key, pair.Value); 
+        }
+    }
+
+    [ClientRpc]
+    void RpcUpdateScores(string playertoUpdateId, int score)
+    {
+        if (!isLocalPlayer)
+            return;
+
+        //Debug.Log("Update score for '"+playertoUpdateId+"' (score:"+score+") from player : "+PlayerId);
+
+        if (frags.ContainsKey(playertoUpdateId))
+            frags[playertoUpdateId] = score;
+        else
+            frags.Add(playertoUpdateId, score);
+
+        if (PlayerId == playertoUpdateId)
+                currentFrags = score;
+        
     }
 
     public override void OnStartLocalPlayer()
     {
         GameInfoHandler.GameStarted = true;
-
-        //Debug.Log(GameInfoHandler.GameStarted);
+        PlayerId = GameInfoHandler.PlayerName;
+        CmdNewPlayer(PlayerId);
     }
 }
