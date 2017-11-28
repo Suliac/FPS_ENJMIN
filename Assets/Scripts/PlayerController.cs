@@ -376,9 +376,9 @@ public class PlayerController : NetworkBehaviour
             current = weaponToUnlock;
             currentWeapons.Add(current);
             currentWeapons = currentWeapons.OrderBy(w => w.Id).ToList();
+            current.CurrentAmmo = current.MaxAmmo;
         }
 
-        current.CurrentAmmo = current.MaxAmmo;
     }
 
     public void AddAmmo(int idWeapon)
@@ -408,7 +408,6 @@ public class PlayerController : NetworkBehaviour
     void CmdFire(int weaponIndex, Vector3 firePosition)
     {
         var weapon = currentWeapons[weaponIndex];
-
         var bullet = Instantiate(weapon.Bullet, firePosition, Quaternion.identity);
 
         bullet.GetComponent<Rigidbody>().velocity = Camera.transform.forward * weapon.BulletSpeed;
