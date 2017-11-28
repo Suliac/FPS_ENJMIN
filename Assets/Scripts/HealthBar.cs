@@ -62,8 +62,7 @@ public class HealthBar : MonoBehaviour
 
         Texture2D result = new Texture2D(width, height);
         result.SetPixels(pix);
-        result.Apply()
-            ;
+        result.Apply();
         return result;
     }
 }

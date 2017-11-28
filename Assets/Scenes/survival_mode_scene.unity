@@ -517,6 +517,7 @@ GameObject:
   - component: {fileID: 738752196}
   - component: {fileID: 738752195}
   - component: {fileID: 738752194}
+  - component: {fileID: 738752197}
   m_Layer: 0
   m_Name: NetworkManager
   m_TagString: Untagged
@@ -530,7 +531,7 @@ MonoBehaviour:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 738752193}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 227461547, guid: 870353891bb340e2b2a9c8707e7419ba, type: 3}
   m_Name: 
@@ -637,6 +638,20 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &738752197
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 738752193}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe4f8e30a70b8fd4481da96368ebd81e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  IpAddress: localhost
+  Port: 5555
+  GuiOffset: 0
 --- !u!1 &828485787
 GameObject:
   m_ObjectHideFlags: 0
@@ -710,9 +725,9 @@ GameObject:
   serializedVersion: 5
   m_Component:
   - component: {fileID: 913044714}
-  - component: {fileID: 913044713}
   - component: {fileID: 913044715}
   - component: {fileID: 913044716}
+  - component: {fileID: 913044713}
   m_Layer: 0
   m_Name: GameHandler
   m_TagString: Untagged
@@ -728,9 +743,30 @@ MonoBehaviour:
   m_GameObject: {fileID: 913044712}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 43bf1e7ee4b99b146b1143b5cb186316, type: 3}
+  m_Script: {fileID: 372142912, guid: dc443db3e92b4983b9738c1131f555cb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  m_SceneId:
+    m_Value: 0
+  m_AssetId:
+    i0: 0
+    i1: 0
+    i2: 0
+    i3: 0
+    i4: 0
+    i5: 0
+    i6: 0
+    i7: 0
+    i8: 0
+    i9: 0
+    i10: 0
+    i11: 0
+    i12: 0
+    i13: 0
+    i14: 0
+    i15: 0
+  m_ServerOnly: 1
+  m_LocalPlayerAuthority: 0
 --- !u!4 &913044714
 Transform:
   m_ObjectHideFlags: 0
@@ -742,7 +778,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 11
+  m_RootOrder: 12
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &913044715
 MonoBehaviour:
@@ -755,10 +791,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 90879936a2e4ea942b45e4f7ae4789bb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _PlayerUi: {fileID: 1347192538}
-  _InfiniteAmmoImage: {fileID: 223899534}
   _GameStarted: 0
   _NumberPickup: 0
+  _PlayerUi: {fileID: 1347192538}
+  _InfiniteAmmoImage: {fileID: 223899534}
 --- !u!114 &913044716
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -770,6 +806,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fad5dc80e620a8242984576122451062, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  FragToWin: 20
 --- !u!1 &1250039285
 GameObject:
   m_ObjectHideFlags: 0
@@ -1288,3 +1325,43 @@ CanvasRenderer:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 2064716485}
+--- !u!1 &2089791763
+GameObject:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  serializedVersion: 5
+  m_Component:
+  - component: {fileID: 2089791765}
+  - component: {fileID: 2089791764}
+  m_Layer: 0
+  m_Name: GameInit
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &2089791764
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 2089791763}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 43bf1e7ee4b99b146b1143b5cb186316, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!4 &2089791765
+Transform:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 2089791763}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 960, y: 540, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 11
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
