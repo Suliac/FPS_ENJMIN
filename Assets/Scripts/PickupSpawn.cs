@@ -9,7 +9,6 @@ public class PickupSpawn : NetworkBehaviour {
     public Transform Pickup;
     public const float WaterY = -2.0f;
     public const int MaxNumberContainer = 10;
-    public float TimePickupFalling = 5.0f;
 
     //private int numberContainer = 0;
     private const float maxDistanceRayCast = 300.0f;
@@ -59,16 +58,14 @@ public class PickupSpawn : NetworkBehaviour {
                     }
                 }
 
-                Vector3 startPos = newPickupPos;
-                Vector3 endPos = new Vector3(startPos.x, finalY, startPos.z);
-                
-                Transform newPickup = Instantiate(Pickup, startPos, Quaternion.identity); 
+                Vector3 endPos = new Vector3(newPickupPos.x, finalY, newPickupPos.z);
+                Transform newPickup = Instantiate(Pickup, newPickupPos, Quaternion.identity); 
 
                 // We need an id to find the pickups on all clients
                 WeaponPickup pickupScript = newPickup.GetComponent<WeaponPickup>();
                 NetworkServer.Spawn(newPickup.gameObject);
-                pickupScript.RpcSetEndPosition(endPos);
                 
+                pickupScript.RpcInit(endPos, (PickupType)UnityEngine.Random.Range(0, 2), UnityEngine.Random.Range(1, 3));
                 //pickupScript.RpcPickupFalling(startPos, endPos, TimePickupFalling);
                 
                 GameInfoHandler.AddPickup();

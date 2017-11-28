@@ -281,9 +281,9 @@ public class PlayerController : NetworkBehaviour
 
         wasPreviouslyShooting = isShooting;
 
-        if (Input.GetAxis("Mouse ScrollWheel") > 0f) // Scroll forward
+        if (Input.GetAxis("Mouse ScrollWheel") > 0f || Input.GetKeyUp(KeyCode.O)) // Scroll forward
             nextWeaponWanted = weaponIndex + 1;
-        else if (Input.GetAxis("Mouse ScrollWheel") < 0f) // scroll backward
+        else if (Input.GetAxis("Mouse ScrollWheel") < 0f || Input.GetKeyUp(KeyCode.P)) // scroll backward
             nextWeaponWanted = weaponIndex - 1;
 
         // normalize input if it exceeds 1 in combined length:
@@ -347,7 +347,7 @@ public class PlayerController : NetworkBehaviour
 
             CmdChangeWeapon(nextWeaponWanted, weaponIndex);
             weaponIndex = nextWeaponWanted;
-            animator.SetInteger("CurrentWeapon", weaponIndex);
+            animator.SetInteger("CurrentWeapon", currentWeapons[weaponIndex].Id);
         }
     }
 
@@ -381,6 +381,27 @@ public class PlayerController : NetworkBehaviour
         current.CurrentAmmo = current.MaxAmmo;
     }
 
+    public void AddAmmo(int idWeapon)
+    {
+        if (!isServer)
+            return;
+
+        RpcAddAmmo(idWeapon);
+    }
+
+    [ClientRpc]
+    public void RpcAddAmmo(int idWeapon)
+    {
+        if (idWeapon < 0 || idWeapon >= WeaponsAvailable.Count)
+            return;
+
+        Weapon current = currentWeapons.FirstOrDefault(w => w.Id == idWeapon);
+
+        if (current != null)
+            current.CurrentAmmo = current.MaxAmmo;
+    }
+
+
     #region Commands & RPC Methods
     // Command function is called from the client, but invoked on the server
     [Command]
@@ -391,7 +412,7 @@ public class PlayerController : NetworkBehaviour
         var bullet = Instantiate(weapon.Bullet, firePosition, Quaternion.identity);
 
         bullet.GetComponent<Rigidbody>().velocity = Camera.transform.forward * weapon.BulletSpeed;
-
+        bullet.GetComponent<BulletBehaviour>().SetDamage(weapon.Damages);
         NetworkServer.Spawn(bullet.gameObject);
 
         Destroy(bullet.gameObject, weapon.DestroyBulletAfterSeconds);

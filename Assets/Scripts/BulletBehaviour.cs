@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class BulletBehaviour : MonoBehaviour {
     private int count = 0;
+
+    private int damages = 10;
 	void OnCollisionEnter(Collision col)
     {
         var hit = col.gameObject;
@@ -13,7 +15,7 @@ public class BulletBehaviour : MonoBehaviour {
         {
             count++;
             //Debug.Log("Hit ! "+count);
-            lifeB.TakeDamage(10);
+            lifeB.TakeDamage(damages);
             Destroy(gameObject);
         }
 
@@ -21,5 +23,10 @@ public class BulletBehaviour : MonoBehaviour {
         {
             Destroy(gameObject);
         }
+    }
+
+    public void SetDamage(int damage)
+    {
+        damages = damage;
     }
 }
