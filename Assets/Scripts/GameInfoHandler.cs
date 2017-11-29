@@ -1,19 +1,39 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class GameInfoHandler : MonoBehaviour
 {
     private static GameInfoHandler instance;
 
+    #region GameStates
     public bool _GameStarted = false;
     public static bool GameStarted { get { return instance._GameStarted; } set { instance._GameStarted = value; } }
 
     public bool _GamePaused = false;
     public static bool GamePaused { get { return instance._GamePaused; } set { instance._GamePaused = value; } }
 
+    public bool _GameOver = false;
+    public static bool GameOver { get { return instance._GameOver; } set { instance._GameOver = value; } }
+
+    public bool _DisplayScores = false;
+    public static bool DisplayScores { get { return instance._DisplayScores; } set { instance._DisplayScores = value; } }
+
+    public bool _WantToDisconnect = false;
+    public static bool WantToDisconnect { get { return instance._WantToDisconnect; } set { instance._WantToDisconnect = value; } }
+
+    public bool _ReadyToDisconnect = false;
+    public static bool ReadyToDisconnect { get { return instance._ReadyToDisconnect; } set { instance._ReadyToDisconnect = value; } }
+    #endregion
+
+    #region Names
+    public string _WinnerName;
+    public static string WinnerName { get { return instance._WinnerName; } set { instance._WinnerName = value; } }
+
     public string _PlayerName;
-    public static string PlayerName { get { return instance._PlayerName; } set { instance._PlayerName = value; } }
+    public static string PlayerName { get { return instance._PlayerName; } set { instance._PlayerName = value; } } 
+    #endregion
 
     #region Pickup
     public int _NumberPickup = 0;
@@ -32,6 +52,31 @@ public class GameInfoHandler : MonoBehaviour
     public GameObject _AmmoText;
     public static GameObject AmmoText { get { return instance._AmmoText; } }
     #endregion
+    
+    public Dictionary<string, int> _Frags = new Dictionary<string, int>();
+    public static Dictionary<string, int> Frags { get { return instance._Frags; } }
+    public static void UpdateFrags(string playerName, int score)
+    {
+        if (instance._Frags.ContainsKey(playerName))
+            instance._Frags[playerName] = score;
+        else
+            instance._Frags.Add(playerName, score);
+
+        //instance._Frags.ToList().Sort((pair1, pair2) => pair1.Value.CompareTo(pair2.Value));
+    }
+
+    public static void DeleteFrag(string playerName)
+    {
+        if (instance._Frags.ContainsKey(playerName))
+            instance._Frags.Remove(playerName);
+
+        //instance._Frags.ToList().Sort((pair1, pair2) => pair1.Value.CompareTo(pair2.Value));
+    }
+
+    public static void InitFrags()
+    {
+        instance._Frags = new Dictionary<string, int>();
+    }
 
     void Awake()
     {

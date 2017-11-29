@@ -37,8 +37,6 @@ public class Weapon
 public class PlayerController : NetworkBehaviour
 {
     public string PlayerId;
-    private int currentFrags = 0;
-    private Dictionary<string, int> frags = new Dictionary<string, int>();
 
     public List<Weapon> WeaponsAvailable;
     private List<Weapon> currentWeapons;
@@ -60,6 +58,7 @@ public class PlayerController : NetworkBehaviour
 
     private Text UiHealth;
     private Text UiAmmo;
+    private Text UiFrags;
 
     private bool isJumping = false;
     private bool isWalking = false;
@@ -122,6 +121,9 @@ public class PlayerController : NetworkBehaviour
 
             UiAmmo = GameObject.Find("Ammo_Text").GetComponent<Text>();
             UiHealth = GameObject.Find("Life_Text").GetComponent<Text>();
+            UiFrags = GameObject.Find("Skull_Text").GetComponent<Text>();
+
+            UiFrags.text = "0";
         }
 
         for (int i = 0; i < WeaponsAvailable.Count; i++)
@@ -136,106 +138,99 @@ public class PlayerController : NetworkBehaviour
     // Update is called once per frame
     void Update()
     {
-        Animate();
-
-        if (!isLocalPlayer)
-            return; // If the player isn't the player of the current client, we don't update his position
-        
-
-        if (currentFrags > 0)
+        if (!GameInfoHandler.GameOver)
         {
-            Debug.Log("WAOW");
+            Animate();
+
+            if (!isLocalPlayer)
+                return; // If the player isn't the player of the current client, we don't update his position
+
+
+            ChangeWeapon();
+            UpdateUi();
+
+            if (!isPreviouslyGrounded && characterController.isGrounded)
+            {
+                moveDirection.y = 0f;
+                SetState(State.Jumping, false);
+            }
+            if (!characterController.isGrounded && !isJumping && isPreviouslyGrounded)
+            {
+                moveDirection.y = 0f;
+            }
+
+            isPreviouslyGrounded = characterController.isGrounded;
         }
-
-        if (Input.anyKey && Input.GetKeyDown(KeyCode.Escape))
-        {
-            Cursor.lockState = CursorLockMode.None;
-            Cursor.visible = true;
-
-            GameInfoHandler.GamePaused = true;
-            //Debug.Log("gamePaused");
-        }
-
-
-        ChangeWeapon();
-        UpdateUi();
-
-        if (!isPreviouslyGrounded && characterController.isGrounded)
-        {
-            moveDirection.y = 0f;
-            SetState(State.Jumping, false);
-        }
-        if (!characterController.isGrounded && !isJumping && isPreviouslyGrounded)
-        {
-            moveDirection.y = 0f;
-        }
-
-        isPreviouslyGrounded = characterController.isGrounded;
 
     }
 
     private void FixedUpdate()
     {
-        if (!isLocalPlayer)
-            return; // If the player isn't the player of the current client, we don't update his position
-
-
-        float speed = 0.0f;
-
-        if (!GameInfoHandler.GamePaused)
+        if (!GameInfoHandler.GameOver)
         {
-            GetInput(out speed);
-        }
-        // always move along the camera forward as it is the direction that it being aimed at
-        Vector3 desiredMove = transform.forward * input.y + transform.right * input.x;
+            if (!isLocalPlayer)
+                return; // If the player isn't the player of the current client, we don't update his position
 
-        // get a normal for the surface that is being touched to move along it
-        RaycastHit hitInfo;
-        Physics.SphereCast(transform.position, characterController.radius, Vector3.down, out hitInfo,
-                           characterController.height / 2f, Physics.AllLayers, QueryTriggerInteraction.Ignore);
-        desiredMove = Vector3.ProjectOnPlane(desiredMove, hitInfo.normal).normalized;
 
-        moveDirection.x = desiredMove.x * speed;
-        moveDirection.z = desiredMove.z * speed;
+            float speed = 0.0f;
 
-        if (characterController.isGrounded)
-        {
-            moveDirection.y = -10;
-
-            if (Input.GetButtonDown("Jump"))
+            if (!GameInfoHandler.GamePaused)
             {
-                moveDirection.y = JumpSpeed;
-                isJumping = true;
-                CmdSetState(State.Jumping, true);
-
+                GetInput(out speed);
             }
+            // always move along the camera forward as it is the direction that it being aimed at
+            Vector3 desiredMove = transform.forward * input.y + transform.right * input.x;
+
+            // get a normal for the surface that is being touched to move along it
+            RaycastHit hitInfo;
+            Physics.SphereCast(transform.position, characterController.radius, Vector3.down, out hitInfo,
+                               characterController.height / 2f, Physics.AllLayers, QueryTriggerInteraction.Ignore);
+            desiredMove = Vector3.ProjectOnPlane(desiredMove, hitInfo.normal).normalized;
+
+            moveDirection.x = desiredMove.x * speed;
+            moveDirection.z = desiredMove.z * speed;
+
+            if (characterController.isGrounded)
+            {
+                moveDirection.y = -10;
+
+                if (Input.GetButtonDown("Jump"))
+                {
+                    moveDirection.y = JumpSpeed;
+                    isJumping = true;
+                    CmdSetState(State.Jumping, true);
+
+                }
+            }
+            else
+            {
+                moveDirection += Physics.gravity * GravityMultiplier * Time.fixedDeltaTime;
+            }
+
+
+            characterController.Move(moveDirection * Time.fixedDeltaTime); // move the player   
+            transform.localRotation = charTargetRot; // rotate the player 
+            Camera.parent.localRotation = camTargetRot; // rotate the cam
+            head.localRotation = camTargetRot;
+
+            CmdMove(moveDirection, Time.fixedDeltaTime, camTargetRot, charTargetRot);
         }
-        else
-        {
-            moveDirection += Physics.gravity * GravityMultiplier * Time.fixedDeltaTime;
-        }
-
-
-        characterController.Move(moveDirection * Time.fixedDeltaTime); // move the player   
-        transform.localRotation = charTargetRot; // rotate the player 
-        Camera.parent.localRotation = camTargetRot; // rotate the cam
-        head.localRotation = camTargetRot;
-
-        CmdMove(moveDirection, Time.fixedDeltaTime, camTargetRot, charTargetRot);
-
     }
 
     private void LateUpdate()
     {
-        if (isLocalPlayer)
+        if (!GameInfoHandler.GameOver)
         {
-            CmdLateMove(shootArmRot, shootLeftArmRot);
-        }
+            if (isLocalPlayer)
+            {
+                CmdLateMove(shootArmRot, shootLeftArmRot);
+            }
 
-        if (isShooting)
-        {
-            rightArm.rotation *= shootArmRot;
-            leftArm.rotation *= shootLeftArmRot;
+            if (isShooting)
+            {
+                rightArm.rotation *= shootArmRot;
+                leftArm.rotation *= shootLeftArmRot;
+            }
         }
     }
 
@@ -309,16 +304,30 @@ public class PlayerController : NetworkBehaviour
 
         wasPreviouslyShooting = isShooting;
 
+        //////////////////// Change weapon
         if (Input.GetAxis("Mouse ScrollWheel") > 0f || Input.GetKeyUp(KeyCode.O)) // Scroll forward
             nextWeaponWanted = weaponIndex + 1;
         else if (Input.GetAxis("Mouse ScrollWheel") < 0f || Input.GetKeyUp(KeyCode.P)) // scroll backward
             nextWeaponWanted = weaponIndex - 1;
 
+        /////////////////// Pause
+        if (Input.anyKey && Input.GetKeyDown(KeyCode.Escape))
+        {
+            Cursor.lockState = CursorLockMode.None;
+            Cursor.visible = true;
+
+            GameInfoHandler.GamePaused = true;
+            //Debug.Log("gamePaused");
+        }
+
+        //////////////////// LadderBoard
+        if (Input.anyKey && Input.GetKeyDown(KeyCode.Tab))
+            GameInfoHandler.DisplayScores = !GameInfoHandler.DisplayScores;
+
+        //////////////////////////////////////////////////////
         // normalize input if it exceeds 1 in combined length:
         if (input.sqrMagnitude > 1)
-        {
             input.Normalize();
-        }
     }
 
     private void Animate()
@@ -379,57 +388,6 @@ public class PlayerController : NetworkBehaviour
         }
     }
 
-    public void NewWeapon(int idWeapon)
-    {
-        if (!isServer)
-            return;
-
-        RpcNewWeapon(idWeapon);
-    }
-
-    [ClientRpc]
-    public void RpcNewWeapon(int idWeapon)
-    {
-        if (idWeapon < 0 || idWeapon >= WeaponsAvailable.Count)
-            return;
-
-        Weapon weaponToUnlock = WeaponsAvailable.FirstOrDefault(w => w.Id == idWeapon);
-        if (weaponToUnlock == null)
-            return;
-
-        Weapon current = currentWeapons.FirstOrDefault(w => w.Id == idWeapon);
-
-        if (current == null)
-        {
-            current = weaponToUnlock;
-            currentWeapons.Add(current);
-            currentWeapons = currentWeapons.OrderBy(w => w.Id).ToList();
-            current.CurrentAmmo = current.MaxAmmo;
-        }
-
-    }
-
-    public void AddAmmo(int idWeapon)
-    {
-        if (!isServer)
-            return;
-
-        RpcAddAmmo(idWeapon);
-    }
-
-    [ClientRpc]
-    public void RpcAddAmmo(int idWeapon)
-    {
-        if (idWeapon < 0 || idWeapon >= WeaponsAvailable.Count)
-            return;
-
-        Weapon current = currentWeapons.FirstOrDefault(w => w.Id == idWeapon);
-
-        if (current != null)
-            current.CurrentAmmo = current.MaxAmmo;
-    }
-
-
     #region Commands & RPC Methods
     // Command function is called from the client, but invoked on the server
     [Command]
@@ -445,7 +403,7 @@ public class PlayerController : NetworkBehaviour
         Destroy(bullet.gameObject, weapon.DestroyBulletAfterSeconds);
     }
 
-    #region Move (Network)
+    #region Move
     [Command]
     void CmdMove(Vector3 move, float dt, Quaternion camRotation, Quaternion playerRotation)
     {
@@ -547,8 +505,9 @@ public class PlayerController : NetworkBehaviour
         }
     }
 
-    #endregion 
+    #endregion
 
+    #region Weapon
     [Command]
     void CmdChangeWeapon(int newIndexWeapon, int previousIndexWeapon)
     {
@@ -570,6 +529,134 @@ public class PlayerController : NetworkBehaviour
         weaponIndex = newIndexWeapon;
 
     }
+
+    public void NewWeapon(int idWeapon)
+    {
+        if (!isServer)
+            return;
+
+        RpcNewWeapon(idWeapon);
+    }
+
+    [ClientRpc]
+    public void RpcNewWeapon(int idWeapon)
+    {
+        if (idWeapon < 0 || idWeapon >= WeaponsAvailable.Count)
+            return;
+
+        Weapon weaponToUnlock = WeaponsAvailable.FirstOrDefault(w => w.Id == idWeapon);
+        if (weaponToUnlock == null)
+            return;
+
+        Weapon current = currentWeapons.FirstOrDefault(w => w.Id == idWeapon);
+
+        if (current == null)
+        {
+            current = weaponToUnlock;
+            currentWeapons.Add(current);
+            currentWeapons = currentWeapons.OrderBy(w => w.Id).ToList();
+            current.CurrentAmmo = current.MaxAmmo;
+        }
+
+    }
+
+    public void AddAmmo(int idWeapon)
+    {
+        if (!isServer)
+            return;
+
+        RpcAddAmmo(idWeapon);
+    }
+
+    [ClientRpc]
+    public void RpcAddAmmo(int idWeapon)
+    {
+        if (idWeapon < 0 || idWeapon >= WeaponsAvailable.Count)
+            return;
+
+        Weapon current = currentWeapons.FirstOrDefault(w => w.Id == idWeapon);
+
+        if (current != null)
+            current.CurrentAmmo = current.MaxAmmo;
+    }
+    #endregion
+
+    #region Frags
+    [Command]
+    void CmdNewPlayer(string playerName)
+    {
+        PlayerId = playerName;
+        InGameManager.SubscribeToScoreUpdates(this);
+        InGameManager.NewPlayer(playerName);
+    }
+
+    [Command]
+    public void CmdDisconnectPlayer(string playerName)
+    {
+
+        //Debug.Log("CmdDisconnectPlayer : Player '" + playerName + "' want to disconnect");
+        InGameManager.UnsubscribeToScoreUpdates(this);
+        InGameManager.QuitPlayer(playerName);
+        RpcSetPlayerReadyToQuit();
+
+    }
+
+    [Command]
+    public void CmdUpdateScores()
+    {
+        Dictionary<string, int> frags = InGameManager.fragPerPlayer;
+
+        foreach (var pair in frags)
+        {
+            if (PlayerId == pair.Key && isLocalPlayer && UiFrags != null)
+                UiFrags.text = pair.Value.ToString();
+
+            GameInfoHandler.UpdateFrags(pair.Key, pair.Value);
+            RpcUpdateScores(pair.Key, pair.Value);
+        }
+    }
+
+    [Command]
+    public void CmdDeleteScore(string playerName)
+    {
+        Dictionary<string, int> frags = InGameManager.fragPerPlayer;
+
+        GameInfoHandler.DeleteFrag(playerName);
+        RpcDeleteScore(playerName);
+    }
+
+    [ClientRpc]
+    public void RpcDeleteScore(string playerName)
+    {
+        if (!isLocalPlayer)
+            return;
+
+        GameInfoHandler.DeleteFrag(playerName);
+    }
+
+    [ClientRpc]
+    void RpcUpdateScores(string playertoUpdateId, int score)
+    {
+        if (!isLocalPlayer)
+            return;
+
+        GameInfoHandler.UpdateFrags(playertoUpdateId, score);
+        if (PlayerId == playertoUpdateId)
+            UiFrags.text = score.ToString();
+
+    }
+
+    [ClientRpc]
+    void RpcSetPlayerReadyToQuit()
+    {
+        Debug.Log("from : " + PlayerId);
+        if (!isLocalPlayer)
+            return;
+
+        GameInfoHandler.ReadyToDisconnect = true;
+    }
+    #endregion
+
     #endregion
 
     void OnApplicationFocus(bool hasFocus)
@@ -590,44 +677,15 @@ public class PlayerController : NetworkBehaviour
         }
     }
 
-    [Command]
-    void CmdNewPlayer(string playerName)
-    {
-        PlayerId = playerName;
-        InGameManager.NewPlayer(playerName);
-        InGameManager.SubscribeToScoreUpdates(this);
-    }
-
-    [Command]
-    public void CmdUpdateScores()
-    {
-        frags = InGameManager.fragPerPlayer;
-
-        foreach (var pair in frags)
-        {
-            if (PlayerId == pair.Key)
-                currentFrags = pair.Value;
-
-            RpcUpdateScores(pair.Key, pair.Value); 
-        }
-    }
-
-    [ClientRpc]
-    void RpcUpdateScores(string playertoUpdateId, int score)
+    public void Disconnect()
     {
         if (!isLocalPlayer)
             return;
 
-        //Debug.Log("Update score for '"+playertoUpdateId+"' (score:"+score+") from player : "+PlayerId);
+        //Debug.Log("Disconnect : Player '" + PlayerId + "' want to disconnect");
 
-        if (frags.ContainsKey(playertoUpdateId))
-            frags[playertoUpdateId] = score;
-        else
-            frags.Add(playertoUpdateId, score);
 
-        if (PlayerId == playertoUpdateId)
-                currentFrags = score;
-        
+        CmdDisconnectPlayer(PlayerId);
     }
 
     public override void OnStartLocalPlayer()
