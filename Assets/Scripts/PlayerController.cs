@@ -321,9 +321,11 @@ public class PlayerController : NetworkBehaviour
         }
 
         //////////////////// LadderBoard
-        if (Input.anyKey && Input.GetKeyDown(KeyCode.Tab))
-            GameInfoHandler.DisplayScores = !GameInfoHandler.DisplayScores;
+        if (Input.GetKeyDown(KeyCode.Tab))
+            GameInfoHandler.DisplayScores = true;
 
+        if (Input.GetKeyUp(KeyCode.Tab))
+            GameInfoHandler.DisplayScores = false;
         //////////////////////////////////////////////////////
         // normalize input if it exceeds 1 in combined length:
         if (input.sqrMagnitude > 1)
@@ -586,7 +588,7 @@ public class PlayerController : NetworkBehaviour
     void CmdNewPlayer(string playerName)
     {
         PlayerId = playerName;
-        InGameManager.SubscribeToScoreUpdates(this);
+        InGameManager.Subscribe(this);
         InGameManager.NewPlayer(playerName);
     }
 
@@ -595,7 +597,7 @@ public class PlayerController : NetworkBehaviour
     {
 
         //Debug.Log("CmdDisconnectPlayer : Player '" + playerName + "' want to disconnect");
-        InGameManager.UnsubscribeToScoreUpdates(this);
+        InGameManager.Unsubscribe(this);
         InGameManager.QuitPlayer(playerName);
         RpcSetPlayerReadyToQuit();
 
@@ -623,6 +625,17 @@ public class PlayerController : NetworkBehaviour
 
         GameInfoHandler.DeleteFrag(playerName);
         RpcDeleteScore(playerName);
+    }
+
+    [Command]
+    public void CmdSetGameOver(string winner)
+    {
+        
+        GameInfoHandler.WantToDisconnect = true;
+        GameInfoHandler.GameOver = true;
+        GameInfoHandler.WinnerName = winner;
+
+        RpcSetGameOver(winner);
     }
 
     [ClientRpc]
@@ -654,6 +667,30 @@ public class PlayerController : NetworkBehaviour
             return;
 
         GameInfoHandler.ReadyToDisconnect = true;
+    }
+
+    [ClientRpc]
+    public void RpcSetGameOver(string winner)
+    {
+        if (!isLocalPlayer)
+            return;
+        
+        GameInfoHandler.WantToDisconnect = true;
+        GameInfoHandler.GameOver = true;
+        GameInfoHandler.WinnerName = winner;
+
+        if (!isServer)
+        {
+            GameInfoHandler.ReadyToDisconnect = true;
+        }
+
+        CmdNewClientRdyForGameOver(); // after changing client status, we notify the server
+    }
+
+    [Command]
+    public void CmdNewClientRdyForGameOver()
+    {
+        GameInfoHandler.NewClientRdyForGameOver();
     }
     #endregion
 

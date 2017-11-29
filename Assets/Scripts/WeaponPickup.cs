@@ -14,17 +14,26 @@ public enum PickupType
 public class WeaponPickup : NetworkBehaviour
 {
     public float FallingSpeed = 100.0f;
+
+    [SyncVar]
     public PickupType Type;
-
-    private Transform RifleMini;
-    private Transform LaserMini;
-    private Transform AmmoMini;
-
+    [SyncVar]
     private int WeaponId = -1;
-    private bool used = false;
-    private bool goodPos = false;
+    [SyncVar]
     private Vector3 endPosition;
+
+    public Transform RifleMini;
+    public Transform LaserMini;
+    public Transform AmmoMini;
+
+    private bool used = false;
+
+    private bool goodPos = false;
+
+    private bool chestOpenned = false;
+    private bool animLaunched = false;
     private Animator anim;
+    private float dtOpenChest = 0.0f;
 
     void Awake()
     {
@@ -48,19 +57,37 @@ public class WeaponPickup : NetworkBehaviour
             transform.Translate(-transform.up * FallingSpeed * Time.fixedDeltaTime);
         else if (!goodPos)
         {
+            dtOpenChest = 0;
             transform.position = endPosition;
-            goodPos = true; // avoid to update at each frame
-            anim.SetTrigger("OpenChest");
-
-            if (Type == PickupType.Ammo)
-                AmmoMini.gameObject.SetActive(true);
-
-            if (WeaponId == 1)
-                RifleMini.gameObject.SetActive(true);
-            else if (WeaponId == 2)
-                LaserMini.gameObject.SetActive(true);
-
+            goodPos = true; // avoid to update at each frame                 
         }
+
+        if (goodPos && !chestOpenned)
+        {
+            if(!animLaunched)
+            {
+                anim.SetTrigger("OpenChest");
+                animLaunched = true;
+            }
+
+            dtOpenChest += Time.fixedDeltaTime;
+            
+            if (dtOpenChest > 1.0f)
+            {
+                //Debug.Log("Cool");
+
+                if (Type == PickupType.Ammo)
+                    AmmoMini.gameObject.SetActive(true);
+
+                if (WeaponId == 1)
+                    RifleMini.gameObject.SetActive(true);
+                else if (WeaponId == 2)
+                    LaserMini.gameObject.SetActive(true);
+
+                chestOpenned = true;
+            }
+        }
+
     }
     
     [ClientRpc]

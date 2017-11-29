@@ -506,11 +506,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 714881581ff5adb40961cf7c2a17b640, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  endPosition: {x: 0, y: 0, z: 0}
   FallingSpeed: 50
   Type: 0
-  RifleMini: {fileID: 4146787393261418}
-  LaserMini: {fileID: 4320413712974428}
-  AmmoMini: {fileID: 4510096042888532}
 --- !u!114 &114740316805877296
 MonoBehaviour:
   m_ObjectHideFlags: 1

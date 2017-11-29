@@ -5,7 +5,19 @@ using UnityEngine;
 
 public class GameInfoHandler : MonoBehaviour
 {
+    private static object _lock = new object();
     private static GameInfoHandler instance;
+
+    public static void Init()
+    {
+        instance._WantToDisconnect = false;
+        instance._ReadyToDisconnect = false;
+        instance._GameOver = false;
+        instance._GameStarted = false;
+        instance._GamePaused = false;
+        instance._Frags = new Dictionary<string, int>();
+        instance._NbRdyGameOver = 0;
+    }
 
     #region GameStates
     public bool _GameStarted = false;
@@ -51,8 +63,15 @@ public class GameInfoHandler : MonoBehaviour
 
     public GameObject _AmmoText;
     public static GameObject AmmoText { get { return instance._AmmoText; } }
+
+    public GameObject _GameOverText;
+    public static GameObject GameOverText { get { return instance._GameOverText; } }
+
+    public GameObject _RankingText;
+    public static GameObject RankingText { get { return instance._RankingText; } }
     #endregion
-    
+
+    #region Frags
     public Dictionary<string, int> _Frags = new Dictionary<string, int>();
     public static Dictionary<string, int> Frags { get { return instance._Frags; } }
     public static void UpdateFrags(string playerName, int score)
@@ -76,6 +95,18 @@ public class GameInfoHandler : MonoBehaviour
     public static void InitFrags()
     {
         instance._Frags = new Dictionary<string, int>();
+    }
+    #endregion
+
+    public int _NbRdyGameOver;
+    public static int NbRdyGameOver { get { return instance._NbRdyGameOver; } }
+
+    public static void NewClientRdyForGameOver()
+    {
+        lock(_lock)
+        {
+            instance._NbRdyGameOver++;
+        }
     }
 
     void Awake()

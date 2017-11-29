@@ -26,53 +26,70 @@ public class CustomNetworkHUD : MonoBehaviour
     public void Start()
     {
         _started = false;
+        GameInfoHandler.RankingText.SetActive(false);
+        GameInfoHandler.GameOverText.SetActive(false);
     }
     public void OnGUI()
     {
         InitStyle();
+
         //GUILayout.Space(GuiOffset);
         if (!_started)
         {
-            GameInfoHandler.WantToDisconnect = false;
-            GameInfoHandler.ReadyToDisconnect = false;
-            GameInfoHandler.GameOver = false;
-            GameInfoHandler.GameStarted = false;
-            GameInfoHandler.GamePaused = false;
+            if (!GameInfoHandler.GameOver)
+            {
+                GameInfoHandler.RankingText.SetActive(false);
+                GameInfoHandler.GameOverText.SetActive(false);
+                HostButton();
 
-            HostButton();
+                IpAddress = GUI.TextField(new Rect((Screen.width - TextBoxWidth) / 2, Screen.height / 2 - 1.5f * TextBoxHeight, TextBoxWidth, TextBoxHeight), IpAddress);
+                Port = GUI.TextField(new Rect((Screen.width - TextBoxWidth) / 2, Screen.height / 2 - 2.5f * TextBoxHeight, TextBoxWidth, TextBoxHeight), Port, 5);
+                PlayerName = GUI.TextField(new Rect((Screen.width - TextBoxWidth) / 2, Screen.height / 2 - 3.5f * TextBoxHeight, TextBoxWidth, TextBoxHeight), PlayerName, 25);
 
-            IpAddress = GUI.TextField(new Rect((Screen.width - TextBoxWidth) / 2, Screen.height / 2 - 1.5f * TextBoxHeight, TextBoxWidth, TextBoxHeight), IpAddress);
-            Port = GUI.TextField(new Rect((Screen.width - TextBoxWidth) / 2, Screen.height / 2 - 2.5f * TextBoxHeight, TextBoxWidth, TextBoxHeight), Port, 5);
-            PlayerName = GUI.TextField(new Rect((Screen.width - TextBoxWidth) / 2, Screen.height / 2 - 3.5f * TextBoxHeight, TextBoxWidth, TextBoxHeight), PlayerName, 25);
-
-            JoinButton();
+                JoinButton();
+            }
+            else
+            {
+                LeaderBoard();
+                ReturnToMenuButton();
+            }
         }
         else
         {
+            if (!GameInfoHandler.GameOver && !GameInfoHandler.GamePaused)
+            {
+                GameInfoHandler.RankingText.SetActive(false);
+            }
+
             GUI.color = Color.red;
 
             if (!NetworkManager.singleton.isNetworkActive)
+            {
                 GUI.Label(new Rect((Screen.width - LabelWidth) / 2, Screen.height / 2 + 1.5f * LabelHeight, LabelWidth, LabelHeight), "Impossible to reach the server " + IpAddress + ":" + Port);
 
+                GUI.color = Color.white;
+                ReturnToMenuButton();
+            }
 
             GUI.color = Color.white;
 
-            if (GameInfoHandler.GameOver)
-            {
-                DisconnectButton();
-            }
-            else if (GameInfoHandler.GamePaused)
+            if (GameInfoHandler.GamePaused)
             {
                 DisconnectButton();
                 ResumeButton();
             }
 
-            if (GameInfoHandler.DisplayScores)
-                LadderBoard();
+            if (GameInfoHandler.DisplayScores || GameInfoHandler.GamePaused)
+            {
+                LeaderBoard();
+            }
 
-            if (GameInfoHandler.WantToDisconnect && GameInfoHandler.ReadyToDisconnect)
+            if ((GameInfoHandler.WantToDisconnect && GameInfoHandler.ReadyToDisconnect))
             {
                 _started = false;
+                GameInfoHandler.PlayerUi.SetActive(false);
+                Cursor.lockState = CursorLockMode.None;
+                Cursor.visible = true;
                 NetworkManager.singleton.StopHost();
             }
         }
@@ -85,8 +102,11 @@ public class CustomNetworkHUD : MonoBehaviour
             _started = true;
             NetworkManager.singleton.networkPort = int.Parse(Port);
             NetworkManager.singleton.StartHost();
-            GameInfoHandler.InitFrags();
+
+            GameInfoHandler.Init();
             GameInfoHandler.PlayerName = PlayerName;
+
+            InGameManager.Init();
         }
     }
 
@@ -94,21 +114,25 @@ public class CustomNetworkHUD : MonoBehaviour
     {
         if (GUI.Button(new Rect(Screen.width / 2, (Screen.height - ButtonHeight) / 2, ButtonWidth, ButtonHeight), "Join"))
         {
+            Debug.Log("yo");
             _started = true;
             NetworkManager.singleton.networkAddress = IpAddress;
             NetworkManager.singleton.networkPort = int.Parse(Port);
-
             NetworkManager.singleton.StartClient();
-            GameInfoHandler.InitFrags();
+
+            GameInfoHandler.Init();
             GameInfoHandler.PlayerName = PlayerName;
         }
     }
 
     void DisconnectButton()
     {
-        if (GUI.Button(new Rect(Screen.width / 2, (Screen.height - ButtonHeight) / 2, ButtonWidth, ButtonHeight), "Disconnect"))
+        float size = Mathf.Min((float)GameInfoHandler.Frags.Count, (float)MaxPlayerScoreDisplay);
+        float yOffset = (LabelHeight * size / 2) + 25;
+
+        if (GUI.Button(new Rect(Screen.width / 2, ((Screen.height - ButtonHeight) / 2) + yOffset, ButtonWidth, ButtonHeight), "Disconnect"))
         {
-            
+
             GameInfoHandler.GameOver = false;
             GameInfoHandler.GameStarted = false;
             GameInfoHandler.GamePaused = false;
@@ -133,10 +157,45 @@ public class CustomNetworkHUD : MonoBehaviour
             GameInfoHandler.WantToDisconnect = true;
         }
     }
+    void ReturnToMenuButton()
+    {
+        float size = Mathf.Min((float)GameInfoHandler.Frags.Count, (float)MaxPlayerScoreDisplay);
+        float yOffset = (LabelHeight * size / 2) + 25;
 
+        if (GUI.Button(new Rect((Screen.width - ButtonWidth) / 2, ((Screen.height - ButtonHeight) / 2) + yOffset, ButtonWidth, ButtonHeight), "Return to menu"))
+        {
+            GameInfoHandler.GameOver = false;
+            GameInfoHandler.GameStarted = false;
+            GameInfoHandler.GamePaused = false;
+
+            GameInfoHandler.AmmoText.SetActive(true);
+            GameInfoHandler.InfiniteAmmoImage.SetActive(true);
+            GameInfoHandler.PlayerUi.SetActive(false);
+
+            Cursor.lockState = CursorLockMode.None;
+            Cursor.visible = true;
+
+            _started = false;
+            //var allPlayers = GameObject.FindGameObjectsWithTag("Player");
+            //foreach (var player in allPlayers)
+            //{
+            //    PlayerController controller = player.GetComponent<PlayerController>();
+            //    if (controller != null && controller.isLocalPlayer)
+            //    {
+            //        controller.Disconnect();
+            //    }
+            //}
+
+            //GameInfoHandler.WantToDisconnect = true;
+        }
+    }
     void ResumeButton()
     {
-        if (GUI.Button(new Rect(Screen.width / 2 - ButtonWidth, (Screen.height - ButtonHeight) / 2, ButtonWidth, ButtonHeight), "Resume"))
+
+        float size = Mathf.Min((float)GameInfoHandler.Frags.Count, (float)MaxPlayerScoreDisplay);
+        float yOffset = (LabelHeight * size / 2) + 25;
+
+        if (GUI.Button(new Rect(Screen.width / 2 - ButtonWidth, ((Screen.height - ButtonHeight) / 2) + yOffset, ButtonWidth, ButtonHeight), "Resume"))
         {
             GameInfoHandler.GamePaused = false;
             Cursor.visible = false;
@@ -144,11 +203,22 @@ public class CustomNetworkHUD : MonoBehaviour
         }
     }
 
-    void LadderBoard()
+    void LeaderBoard()
     {
+        if (GameInfoHandler.GameOver)
+        {
+            GameInfoHandler.GameOverText.SetActive(true);
+            GameInfoHandler.RankingText.SetActive(false);
+        }
+        else
+        {
+            GameInfoHandler.GameOverText.SetActive(false);
+            GameInfoHandler.RankingText.SetActive(true);
+        }
+
         var frags = GameInfoHandler.Frags; // TODO : Voir pour pas appeler ca tout le temps | idée : notifier comme player controller ?
         float size = Mathf.Min((float)frags.Count, (float)MaxPlayerScoreDisplay);
-        
+
         //float posY = Screen.height / 2.0f - (size / 2.0f - rank) * LabelHeight;
         float posY = Screen.height / 2.0f - (LabelHeight * (size + 1)) / 2;
         float posX = Screen.width / 2.0f - LabelWidth / 2;
