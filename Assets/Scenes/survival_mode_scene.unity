@@ -959,9 +959,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fe4f8e30a70b8fd4481da96368ebd81e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  IpAddress: 
-  Port: 
-  PlayerName: 
+  IpAddress: localhost
+  Port: 55555
+  PlayerName: YourNameHere
   ButtonWidth: 100
   ButtonHeight: 30
   TextBoxWidth: 200
