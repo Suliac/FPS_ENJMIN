@@ -959,13 +959,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fe4f8e30a70b8fd4481da96368ebd81e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  IpAddress: localhost
-  Port: 5555
-  PlayerName: YourNameHere
+  IpAddress: 
+  Port: 
+  PlayerName: 
   ButtonWidth: 100
   ButtonHeight: 30
   TextBoxWidth: 200
-  TextBoxHeight: 30
+  TextBoxHeight: 25
   LabelWidth: 275
   LabelHeight: 25
   MaxPlayerScoreDisplay: 5
@@ -997,7 +997,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fad5dc80e620a8242984576122451062, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  FragToWin: 1
+  FragToWin: 20
 --- !u!114 &801095547
 MonoBehaviour:
   m_ObjectHideFlags: 0
