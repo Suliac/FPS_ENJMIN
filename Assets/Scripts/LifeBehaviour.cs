@@ -11,7 +11,7 @@ public class LifeBehaviour : NetworkBehaviour
     public bool DestroyOnDeath;
 
     private GameObject startPosition;
-    private PlayerController playerController;
+    //private PlayerController playerController;
 
     [SyncVar]
     public int Health = MaxHealth;
@@ -19,7 +19,7 @@ public class LifeBehaviour : NetworkBehaviour
     void Awake()
     {
         startPosition = GameObject.Find("StartPosition");
-        playerController = gameObject.GetComponent<PlayerController>();
+        //playerController = gameObject.GetComponent<PlayerController>();
     }
 
     public void TakeDamage(int amount, string shootingPlayerName)

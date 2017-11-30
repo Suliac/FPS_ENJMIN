@@ -44,6 +44,11 @@ public class InGameManager : NetworkBehaviour
         fragPerPlayer = new Dictionary<string, int>();
     }
 
+    public static bool IsExistingPlayer(string playerName)
+    {
+        return fragPerPlayer.ContainsKey(playerName);
+    }
+
     public static void NewPlayer(string playerId)
     {
         if (!fragPerPlayer.ContainsKey(playerId))

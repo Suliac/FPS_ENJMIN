@@ -17,6 +17,7 @@ public class GameInfoHandler : MonoBehaviour
         instance._GamePaused = false;
         instance._Frags = new Dictionary<string, int>();
         instance._NbRdyGameOver = 0;
+        instance._NameTaken = false;
     }
 
     #region GameStates
@@ -67,6 +68,9 @@ public class GameInfoHandler : MonoBehaviour
     public GameObject _GameOverText;
     public static GameObject GameOverText { get { return instance._GameOverText; } }
 
+    public GameObject _TitleText;
+    public static GameObject TitleText { get { return instance._TitleText; } }
+
     public GameObject _RankingText;
     public static GameObject RankingText { get { return instance._RankingText; } }
     #endregion
@@ -97,6 +101,9 @@ public class GameInfoHandler : MonoBehaviour
         instance._Frags = new Dictionary<string, int>();
     }
     #endregion
+
+    public bool _NameTaken = false;
+    public static bool NameTaken { get { return instance._NameTaken; } set { instance._NameTaken = value; } }
 
     public int _NbRdyGameOver;
     public static int NbRdyGameOver { get { return instance._NbRdyGameOver; } }

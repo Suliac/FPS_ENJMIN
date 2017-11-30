@@ -583,13 +583,43 @@ public class PlayerController : NetworkBehaviour
     }
     #endregion
 
-    #region Frags
+    #region Connection
+
     [Command]
-    void CmdNewPlayer(string playerName)
+    void CmdConnecting(string playerName)
     {
-        PlayerId = playerName;
-        InGameManager.Subscribe(this);
-        InGameManager.NewPlayer(playerName);
+        if (!InGameManager.IsExistingPlayer(playerName))
+        {
+            PlayerId = playerName;
+            InGameManager.Subscribe(this);
+            InGameManager.NewPlayer(playerName);
+            RpcConnecting();
+        }
+        else
+        {
+            RpcErrorNameExisting();
+        }
+    }
+
+    [ClientRpc]
+    void RpcConnecting()
+    {
+        if (!isLocalPlayer)
+            return;
+
+        GameInfoHandler.GameStarted = true;
+        PlayerId = GameInfoHandler.PlayerName;
+    }
+
+    [ClientRpc]
+    void RpcErrorNameExisting()
+    {
+        if (!isLocalPlayer)
+            return;
+
+        GameInfoHandler.NameTaken = true;
+        GameInfoHandler.WantToDisconnect = true;
+        GameInfoHandler.ReadyToDisconnect = true;
     }
 
     [Command]
@@ -602,6 +632,19 @@ public class PlayerController : NetworkBehaviour
         RpcSetPlayerReadyToQuit();
 
     }
+
+    [ClientRpc]
+    void RpcSetPlayerReadyToQuit()
+    {
+        //Debug.Log("from : " + PlayerId);
+        if (!isLocalPlayer)
+            return;
+
+        GameInfoHandler.ReadyToDisconnect = true;
+    }
+    #endregion
+
+    #region Frags
 
     [Command]
     public void CmdUpdateScores()
@@ -621,8 +664,6 @@ public class PlayerController : NetworkBehaviour
     [Command]
     public void CmdDeleteScore(string playerName)
     {
-        Dictionary<string, int> frags = InGameManager.fragPerPlayer;
-
         GameInfoHandler.DeleteFrag(playerName);
         RpcDeleteScore(playerName);
     }
@@ -630,7 +671,7 @@ public class PlayerController : NetworkBehaviour
     [Command]
     public void CmdSetGameOver(string winner)
     {
-        
+
         GameInfoHandler.WantToDisconnect = true;
         GameInfoHandler.GameOver = true;
         GameInfoHandler.WinnerName = winner;
@@ -660,21 +701,11 @@ public class PlayerController : NetworkBehaviour
     }
 
     [ClientRpc]
-    void RpcSetPlayerReadyToQuit()
-    {
-        Debug.Log("from : " + PlayerId);
-        if (!isLocalPlayer)
-            return;
-
-        GameInfoHandler.ReadyToDisconnect = true;
-    }
-
-    [ClientRpc]
     public void RpcSetGameOver(string winner)
     {
         if (!isLocalPlayer)
             return;
-        
+
         GameInfoHandler.WantToDisconnect = true;
         GameInfoHandler.GameOver = true;
         GameInfoHandler.WinnerName = winner;
@@ -719,16 +750,12 @@ public class PlayerController : NetworkBehaviour
         if (!isLocalPlayer)
             return;
 
-        //Debug.Log("Disconnect : Player '" + PlayerId + "' want to disconnect");
-
-
         CmdDisconnectPlayer(PlayerId);
     }
 
     public override void OnStartLocalPlayer()
     {
-        GameInfoHandler.GameStarted = true;
-        PlayerId = GameInfoHandler.PlayerName;
-        CmdNewPlayer(PlayerId);
+        CmdConnecting(GameInfoHandler.PlayerName);
+
     }
 }

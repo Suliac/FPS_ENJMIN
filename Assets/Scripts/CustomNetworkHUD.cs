@@ -17,6 +17,7 @@ public class CustomNetworkHUD : MonoBehaviour
     public int TextBoxHeight = 25;
     public int LabelWidth = 275;
     public int LabelHeight = 25;
+    public int yLobbyOffset = 25;
 
     public int MaxPlayerScoreDisplay = 5;
 
@@ -28,6 +29,7 @@ public class CustomNetworkHUD : MonoBehaviour
         _started = false;
         GameInfoHandler.RankingText.SetActive(false);
         GameInfoHandler.GameOverText.SetActive(false);
+        GameInfoHandler.TitleText.SetActive(false);
     }
     public void OnGUI()
     {
@@ -40,32 +42,45 @@ public class CustomNetworkHUD : MonoBehaviour
             {
                 GameInfoHandler.RankingText.SetActive(false);
                 GameInfoHandler.GameOverText.SetActive(false);
-                HostButton();
+                GameInfoHandler.TitleText.SetActive(true);
 
-                IpAddress = GUI.TextField(new Rect((Screen.width - TextBoxWidth) / 2, Screen.height / 2 - 1.5f * TextBoxHeight, TextBoxWidth, TextBoxHeight), IpAddress);
-                Port = GUI.TextField(new Rect((Screen.width - TextBoxWidth) / 2, Screen.height / 2 - 2.5f * TextBoxHeight, TextBoxWidth, TextBoxHeight), Port, 5);
-                PlayerName = GUI.TextField(new Rect((Screen.width - TextBoxWidth) / 2, Screen.height / 2 - 3.5f * TextBoxHeight, TextBoxWidth, TextBoxHeight), PlayerName, 25);
+                if (!GameInfoHandler.NameTaken)
+                {
+                    HostButton();
 
-                JoinButton();
+                    IpAddress = GUI.TextField(new Rect((Screen.width - TextBoxWidth) / 2, Screen.height / 2 - 1.5f * TextBoxHeight + yLobbyOffset, TextBoxWidth, TextBoxHeight), IpAddress);
+                    Port = GUI.TextField(new Rect((Screen.width - TextBoxWidth) / 2, Screen.height / 2 - 2.5f * TextBoxHeight + yLobbyOffset, TextBoxWidth, TextBoxHeight), Port, 5);
+                    PlayerName = GUI.TextField(new Rect((Screen.width - TextBoxWidth) / 2, Screen.height / 2 - 3.5f * TextBoxHeight + yLobbyOffset, TextBoxWidth, TextBoxHeight), PlayerName, 25);
+
+                    JoinButton();
+                }
+                else
+                {
+                    GUI.color = Color.red;
+                    GUI.Label(new Rect((Screen.width - 120) / 2, (Screen.height - LabelHeight) / 2, 120, LabelHeight), "Name already taken");
+
+                    GUI.color = Color.white;
+                    ReturnToMenuButton();
+                }
             }
             else
             {
+                GameInfoHandler.TitleText.SetActive(false);
                 LeaderBoard();
                 ReturnToMenuButton();
             }
         }
         else
         {
+            GameInfoHandler.TitleText.SetActive(false);
             if (!GameInfoHandler.GameOver && !GameInfoHandler.GamePaused)
-            {
                 GameInfoHandler.RankingText.SetActive(false);
-            }
 
-            GUI.color = Color.red;
 
             if (!NetworkManager.singleton.isNetworkActive)
             {
-                GUI.Label(new Rect((Screen.width - LabelWidth) / 2, Screen.height / 2 + 1.5f * LabelHeight, LabelWidth, LabelHeight), "Impossible to reach the server " + IpAddress + ":" + Port);
+                GUI.color = Color.red;
+                GUI.Label(new Rect((Screen.width - LabelWidth) / 2, (Screen.height - LabelHeight) / 2, LabelWidth, LabelHeight), "Impossible to reach the server " + IpAddress + ":" + Port);
 
                 GUI.color = Color.white;
                 ReturnToMenuButton();
@@ -97,7 +112,7 @@ public class CustomNetworkHUD : MonoBehaviour
 
     void HostButton()
     {
-        if (GUI.Button(new Rect(Screen.width / 2 - ButtonWidth, (Screen.height - ButtonHeight) / 2, ButtonWidth, ButtonHeight), "Host"))
+        if (GUI.Button(new Rect(Screen.width / 2 - ButtonWidth, (Screen.height - ButtonHeight) / 2 + yLobbyOffset, ButtonWidth, ButtonHeight), "Host"))
         {
             _started = true;
             NetworkManager.singleton.networkPort = int.Parse(Port);
@@ -112,9 +127,9 @@ public class CustomNetworkHUD : MonoBehaviour
 
     void JoinButton()
     {
-        if (GUI.Button(new Rect(Screen.width / 2, (Screen.height - ButtonHeight) / 2, ButtonWidth, ButtonHeight), "Join"))
+        if (GUI.Button(new Rect(Screen.width / 2, (Screen.height - ButtonHeight) / 2 + yLobbyOffset, ButtonWidth, ButtonHeight), "Join"))
         {
-            Debug.Log("yo");
+            //Debug.Log("yo");
             _started = true;
             NetworkManager.singleton.networkAddress = IpAddress;
             NetworkManager.singleton.networkPort = int.Parse(Port);
@@ -159,14 +174,23 @@ public class CustomNetworkHUD : MonoBehaviour
     }
     void ReturnToMenuButton()
     {
-        float size = Mathf.Min((float)GameInfoHandler.Frags.Count, (float)MaxPlayerScoreDisplay);
-        float yOffset = (LabelHeight * size / 2) + 25;
+        float yOffset = 0.0f;
+        if (!GameInfoHandler.NameTaken)
+        {
+            float size = Mathf.Min((float)GameInfoHandler.Frags.Count, (float)MaxPlayerScoreDisplay);
+            yOffset = (LabelHeight * size / 2) + 25;
+        }
+        else
+        {
+            yOffset = (LabelHeight / 2) + 25;
+        }
 
         if (GUI.Button(new Rect((Screen.width - ButtonWidth) / 2, ((Screen.height - ButtonHeight) / 2) + yOffset, ButtonWidth, ButtonHeight), "Return to menu"))
         {
             GameInfoHandler.GameOver = false;
             GameInfoHandler.GameStarted = false;
             GameInfoHandler.GamePaused = false;
+            GameInfoHandler.NameTaken = false;
 
             GameInfoHandler.AmmoText.SetActive(true);
             GameInfoHandler.InfiniteAmmoImage.SetActive(true);
