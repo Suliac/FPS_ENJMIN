@@ -6,15 +6,18 @@ using UnityEngine.Networking;
 
 public class InGameManager : NetworkBehaviour
 {
+    private static object mutex = new object();
     public int FragToWin = 20;
     public static Dictionary<string, int> fragPerPlayer = new Dictionary<string, int>();
-    public static List<PlayerController> toNotify; // TODO : créer une classe générique et la faire hériter aux classe pouvant s'abonner
-
+    public static Dictionary<string, PlayerController> toNotify; // TODO : créer une classe générique et la faire hériter aux classe pouvant s'abonner
+    public float TimeBetweenTest = 1.0f;
+    private float dtTestPlayerDisconnect = 0.0f;
     // Use this for initialization
     void Start()
     {
-        toNotify = new List<PlayerController>();
+        toNotify = new Dictionary<string, PlayerController>();
         fragPerPlayer = new Dictionary<string, int>();
+        dtTestPlayerDisconnect = 0.0f;
     }
 
     // Update is called once per frame
@@ -34,13 +37,28 @@ public class InGameManager : NetworkBehaviour
 
         if (GameInfoHandler.NbRdyGameOver >= (toNotify.Count - 1))
             GameInfoHandler.ReadyToDisconnect = true; // we need to wait until all the clients are notified of the gameover
-                                                      //else
-                                                      //Debug.Log("NbRdyGameOver : " + GameInfoHandler.NbRdyGameOver);                                                      
+
+        dtTestPlayerDisconnect += Time.deltaTime;
+        if (dtTestPlayerDisconnect >= TimeBetweenTest)
+        {
+            var playerToNotify = new Dictionary<string, PlayerController>(toNotify);
+            foreach (var player in playerToNotify)
+            {
+                if (player.Value == null)
+                {
+                    Unsubscribe(player.Key);
+                    QuitPlayer(player.Key);
+                }
+            }
+
+            dtTestPlayerDisconnect -= TimeBetweenTest;
+        }
+
     }
 
     public static void Init()
     {
-        toNotify = new List<PlayerController>();
+        toNotify = new Dictionary<string, PlayerController>();
         fragPerPlayer = new Dictionary<string, int>();
     }
 
@@ -76,38 +94,46 @@ public class InGameManager : NetworkBehaviour
         NotifyAllNewScore();
     }
 
-    public static void Subscribe(PlayerController controller)
+    public static void Subscribe(string playerName, PlayerController controller)
     {
-        toNotify.Add(controller);
+        lock (mutex)
+            toNotify.Add(playerName, controller);
     }
 
-    public static void Unsubscribe(PlayerController controller)
+    public static void Unsubscribe(string playerName)
     {
-        toNotify.Remove(controller);
+        lock (mutex)
+            toNotify.Remove(playerName);
         //Debug.Log("Unsub, count now = " + toNotify.Count);
     }
 
     static void NotifyAllNewScore()
     {
-        foreach (var playerController in toNotify)
+        var playerToNotify = new Dictionary<string, PlayerController>(toNotify);
+        foreach (var playerController in playerToNotify)
         {
-            playerController.CmdUpdateScores();
+            if (playerController.Value != null)
+                playerController.Value.CmdUpdateScores();
         }
     }
 
     static void NotifyDisconnect(string playerName)
     {
-        foreach (var playerController in toNotify)
+        var playerToNotify = new Dictionary<string, PlayerController>(toNotify);
+        foreach (var playerController in playerToNotify)
         {
-            playerController.CmdDeleteScore(playerName);
+            if (playerController.Value != null)
+                playerController.Value.CmdDeleteScore(playerName);
         }
     }
 
     static void NotifyAllGameOver()
     {
-        foreach (var playerController in toNotify)
+        var playerToNotify = new Dictionary<string, PlayerController>(toNotify);
+        foreach (var playerController in playerToNotify)
         {
-            playerController.CmdSetGameOver(GameInfoHandler.WinnerName);
+            if (playerController.Value != null)
+                playerController.Value.CmdSetGameOver(GameInfoHandler.WinnerName);
         }
 
     }

@@ -594,7 +594,7 @@ public class PlayerController : NetworkBehaviour
         if (!InGameManager.IsExistingPlayer(playerName))
         {
             PlayerId = playerName;
-            InGameManager.Subscribe(this);
+            InGameManager.Subscribe(playerName, this);
             InGameManager.NewPlayer(playerName);
             RpcConnecting();
         }
@@ -630,7 +630,7 @@ public class PlayerController : NetworkBehaviour
     {
 
         //Debug.Log("CmdDisconnectPlayer : Player '" + playerName + "' want to disconnect");
-        InGameManager.Unsubscribe(this);
+        InGameManager.Unsubscribe(playerName);
         InGameManager.QuitPlayer(playerName);
         RpcSetPlayerReadyToQuit();
 
@@ -754,6 +754,17 @@ public class PlayerController : NetworkBehaviour
             return;
 
         CmdDisconnectPlayer(PlayerId);
+    }
+
+    public void OnApplicationQuit()
+    {
+        CmdDisconnectPlayer(PlayerId);
+    }
+
+    void OnPlayerDisconnected(NetworkPlayer player) {
+        Debug.Log("Clean up after player " + player);
+        Network.RemoveRPCs(player);
+        Network.DestroyPlayerObjects(player);
     }
 
     public override void OnStartLocalPlayer()
