@@ -13,6 +13,7 @@ public enum PickupType
 
 public class WeaponPickup : NetworkBehaviour
 {
+    public GameObject Zombie;
     public float FallingSpeed = 100.0f;
     public int LifeAmount = 25;
 
@@ -106,6 +107,12 @@ public class WeaponPickup : NetworkBehaviour
                 }
 
                 chestOpenned = true;
+
+                //if (isServer)
+                //{
+                //    GameObject newPickup = (GameObject)Instantiate(Zombie, transform.position, Quaternion.identity);
+                //    NetworkServer.Spawn(Zombie);
+                //}
             }
         }
 
@@ -119,6 +126,11 @@ public class WeaponPickup : NetworkBehaviour
         WeaponId = initWeaponId;
     }
     
+    [Command]
+    public void CmdSpawnZombie()
+    {
+
+    }
 
     void OnTriggerEnter(Collider col)
     {

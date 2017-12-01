@@ -37,7 +37,7 @@ public class Weapon
 public class PlayerController : NetworkBehaviour
 {
     public string PlayerId;
-
+    
     public List<Weapon> WeaponsAvailable;
     private List<Weapon> currentWeapons;
     private int weaponIndex = 0;
