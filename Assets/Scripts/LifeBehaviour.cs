@@ -42,6 +42,15 @@ public class LifeBehaviour : NetworkBehaviour
         }
     }
 
+    public void AddLife(int amount)
+    {
+        if (!isServer)
+            return;
+
+        Health += amount;
+
+    }
+
     [ClientRpc]
     void RpcRespawn()
     {

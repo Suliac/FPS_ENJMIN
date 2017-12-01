@@ -65,7 +65,7 @@ public class PickupSpawn : NetworkBehaviour {
                 WeaponPickup pickupScript = newPickup.GetComponent<WeaponPickup>();
                 NetworkServer.Spawn(newPickup.gameObject);
                 
-                pickupScript.RpcInit(endPos, (PickupType)UnityEngine.Random.Range(0, 2), UnityEngine.Random.Range(1, 3));
+                pickupScript.RpcInit(endPos, (PickupType)UnityEngine.Random.Range(0, 3), UnityEngine.Random.Range(1, 3));
                 //pickupScript.RpcPickupFalling(startPos, endPos, TimePickupFalling);
                 
                 GameInfoHandler.AddPickup();

@@ -7,13 +7,14 @@ public enum PickupType
 {
     Weapon,
     Ammo,
-    Evil,
-    Explosion
+    Life,
+    Evil
 }
 
 public class WeaponPickup : NetworkBehaviour
 {
     public float FallingSpeed = 100.0f;
+    public int LifeAmount = 25;
 
     [SyncVar]
     public PickupType Type;
@@ -22,9 +23,10 @@ public class WeaponPickup : NetworkBehaviour
     [SyncVar]
     private Vector3 endPosition;
 
-    public Transform RifleMini;
-    public Transform LaserMini;
-    public Transform AmmoMini;
+    private Transform RifleMini;
+    private Transform LaserMini;
+    private Transform AmmoMini;
+    private Transform LifeMini;
 
     private bool used = false;
 
@@ -45,10 +47,12 @@ public class WeaponPickup : NetworkBehaviour
         AmmoMini = transform.GetChild(2);
         RifleMini = transform.GetChild(3).GetChild(0);
         LaserMini = transform.GetChild(3).GetChild(1);
+        LifeMini = transform.GetChild(3).GetChild(2);
 
         AmmoMini.gameObject.SetActive(false);
         RifleMini.gameObject.SetActive(false);
         LaserMini.gameObject.SetActive(false);
+        LifeMini.gameObject.SetActive(false);
     }
 
     void FixedUpdate()
@@ -76,13 +80,30 @@ public class WeaponPickup : NetworkBehaviour
             {
                 //Debug.Log("Cool");
 
-                if (Type == PickupType.Ammo)
-                    AmmoMini.gameObject.SetActive(true);
+                switch (Type)
+                {
+                    case PickupType.Weapon:
+                        if (WeaponId == 1)
+                            RifleMini.gameObject.SetActive(true);
+                        else if (WeaponId == 2)
+                            LaserMini.gameObject.SetActive(true);
+                        break;
+                    case PickupType.Ammo:
+                        AmmoMini.gameObject.SetActive(true);
 
-                if (WeaponId == 1)
-                    RifleMini.gameObject.SetActive(true);
-                else if (WeaponId == 2)
-                    LaserMini.gameObject.SetActive(true);
+                        if (WeaponId == 1)
+                            RifleMini.gameObject.SetActive(true);
+                        else if (WeaponId == 2)
+                            LaserMini.gameObject.SetActive(true);
+                        break;
+                    case PickupType.Life:
+                        LifeMini.gameObject.SetActive(true);
+                        break;
+                    case PickupType.Evil:
+                        break;
+                    default:
+                        break;
+                }
 
                 chestOpenned = true;
             }
@@ -119,7 +140,10 @@ public class WeaponPickup : NetworkBehaviour
                             break;
                         case PickupType.Evil:
                             break;
-                        case PickupType.Explosion:
+                        case PickupType.Life:
+                            LifeBehaviour lifeB = col.gameObject.GetComponent<LifeBehaviour>();
+                            if (lifeB != null)
+                                lifeB.AddLife(LifeAmount);
                             break;
                         default:
                             break;
