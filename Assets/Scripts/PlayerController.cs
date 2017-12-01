@@ -82,6 +82,7 @@ public class PlayerController : NetworkBehaviour
     private Transform leftArm;
     private Transform head;
     private Transform mapPointer;
+    private Transform miniMap;
     //private bool gamePaused = false;
 
     void Awake()
@@ -89,7 +90,9 @@ public class PlayerController : NetworkBehaviour
         head = transform.GetChild(0).GetChild(0).GetChild(1); // Crado mais fonctionne
         rightArm = transform.GetChild(0).GetChild(0).GetChild(4); // Crado mais fonctionne
         leftArm = transform.GetChild(0).GetChild(0).GetChild(5); // Crado mais fonctionne
-        mapPointer = transform.GetChild(2);
+        mapPointer = transform.GetChild(2).GetChild(1);
+        miniMap = transform.GetChild(2).GetChild(0);
+
 
         characterController = GetComponent<CharacterController>();
         animator = GetComponentInChildren<Animator>();
@@ -116,9 +119,11 @@ public class PlayerController : NetworkBehaviour
         {
             Camera.gameObject.SetActive(false);
             mapPointer.gameObject.SetActive(false);
+            miniMap.gameObject.SetActive(false);
         }
         else
         {
+            miniMap.gameObject.SetActive(true);
             GameInfoHandler.PlayerUi.SetActive(true);
 
             UiAmmo = GameObject.Find("Ammo_Text").GetComponent<Text>();
@@ -172,8 +177,7 @@ public class PlayerController : NetworkBehaviour
         {
             if (!isLocalPlayer)
                 return; // If the player isn't the player of the current client, we don't update his position
-
-
+            
             float speed = 0.0f;
 
             if (!GameInfoHandler.GamePaused)
@@ -216,6 +220,7 @@ public class PlayerController : NetworkBehaviour
             head.localRotation = camTargetRot;
 
             CmdMove(moveDirection, Time.fixedDeltaTime, camTargetRot, charTargetRot);
+
         }
     }
 

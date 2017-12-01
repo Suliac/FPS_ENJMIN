@@ -115,7 +115,7 @@ public class GameInfoHandler : MonoBehaviour
             instance._NbRdyGameOver++;
         }
     }
-
+    
     void Awake()
     {
         if (instance == null)
