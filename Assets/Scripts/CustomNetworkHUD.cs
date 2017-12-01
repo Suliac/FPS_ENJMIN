@@ -30,7 +30,6 @@ public class CustomNetworkHUD : MonoBehaviour
         GameInfoHandler.RankingText.SetActive(false);
         GameInfoHandler.GameOverText.SetActive(false);
         GameInfoHandler.TitleText.SetActive(false);
-        GameInfoHandler.MiniMap.SetActive(false);
     }
     public void OnGUI()
     {
@@ -44,7 +43,7 @@ public class CustomNetworkHUD : MonoBehaviour
                 GameInfoHandler.RankingText.SetActive(false);
                 GameInfoHandler.GameOverText.SetActive(false);
                 GameInfoHandler.TitleText.SetActive(true);
-                
+
                 if (!GameInfoHandler.NameTaken)
                 {
                     HostButton();
@@ -74,6 +73,7 @@ public class CustomNetworkHUD : MonoBehaviour
         else
         {
             GameInfoHandler.TitleText.SetActive(false);
+
             if (!GameInfoHandler.GameOver && !GameInfoHandler.GamePaused)
                 GameInfoHandler.RankingText.SetActive(false);
 

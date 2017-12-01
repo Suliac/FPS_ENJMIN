@@ -120,7 +120,6 @@ public class PlayerController : NetworkBehaviour
         else
         {
             GameInfoHandler.PlayerUi.SetActive(true);
-            GameInfoHandler.MiniMap.SetActive(true);
 
             UiAmmo = GameObject.Find("Ammo_Text").GetComponent<Text>();
             UiHealth = GameObject.Find("Life_Text").GetComponent<Text>();

@@ -116,9 +116,6 @@ public class GameInfoHandler : MonoBehaviour
         }
     }
 
-    public GameObject _MiniMap;
-    public static GameObject MiniMap { get { return instance._MiniMap; } }
-
     void Awake()
     {
         if (instance == null)

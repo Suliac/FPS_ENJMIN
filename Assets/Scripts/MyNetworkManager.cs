@@ -8,6 +8,6 @@ public class MyNetworkManager : NetworkManager {
     public override void OnClientDisconnect(NetworkConnection conn)
     {
         base.OnClientDisconnect(conn);
-        Debug.Log("Clean up after player");
+        //Debug.Log("Clean up after player");
     }
 }
