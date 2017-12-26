@@ -137,7 +137,7 @@ public class PlayerController : NetworkBehaviour
     {
         weaponIndex = -1;
         nextWeaponWanted = 0;
-
+        currentWeapons = new List<Weapon>();
         for (int i = 0; i < WeaponsAvailable.Count; i++)
         {
             WeaponsAvailable[i].CurrentAmmo = WeaponsAvailable[i].MaxAmmo;
@@ -584,6 +584,22 @@ public class PlayerController : NetworkBehaviour
             current.CurrentAmmo = current.MaxAmmo;
         }
 
+    }
+
+    [ClientRpc]
+    public void RpcResetWeapons()
+    {
+        InitWeapon();
+    }
+
+    [Command]
+    public void CmdResetWeapons()
+    {
+        print("reset weapons");
+        if (!isServer)
+            return;
+
+        RpcResetWeapons();
     }
 
     public void AddAmmo(int idWeapon)

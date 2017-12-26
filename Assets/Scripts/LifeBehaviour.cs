@@ -99,11 +99,11 @@ public class LifeBehaviour : NetworkBehaviour
         if (isLocalPlayer)
         {
             transform.position = startPosition.transform.position;
-            //PlayerController controller = GetComponent<PlayerController>();
-            //if(controller)
-            //{
-            //    controller.InitWeapon();
-            //}
+            PlayerController controller = GetComponent<PlayerController>();
+            if (controller)
+            {
+                controller.CmdResetWeapons();
+            }
         }
     }
 
