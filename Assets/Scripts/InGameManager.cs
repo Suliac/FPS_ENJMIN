@@ -54,6 +54,20 @@ public class InGameManager : NetworkBehaviour
             dtTestPlayerDisconnect -= TimeBetweenTest;
         }
 
+        var players = new Dictionary<string, PlayerController>(toNotify);
+        foreach (var player in players)
+        {
+            if (player.Value.transform.position.y < -2)
+            {
+                LifeBehaviour life = player.Value.gameObject.GetComponent<LifeBehaviour>();
+                if(life)
+                {
+                    life.Suicide(player.Key);
+                }
+            }
+        }
+
+
     }
 
     public static void Init()
@@ -90,6 +104,15 @@ public class InGameManager : NetworkBehaviour
         //Debug.Log("New frag for : " + playerScoringId);
         if (fragPerPlayer.ContainsKey(playerScoringId))
             fragPerPlayer[playerScoringId]++;
+
+        NotifyAllNewScore();
+    }
+
+    public static void RemoveFrag(string playerScoringId)
+    {
+        //Debug.Log("New frag for : " + playerScoringId);
+        if (fragPerPlayer.ContainsKey(playerScoringId))
+            fragPerPlayer[playerScoringId]--;
 
         NotifyAllNewScore();
     }

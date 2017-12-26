@@ -14,11 +14,20 @@ public class BulletBehaviour : MonoBehaviour
 
         if (lifeB != null && !collision) // If the bullet touch an object with a LifeBehaviour script, the bullet is destroyed after damaging the target
         {
-            collision = true;
-            lifeB.TakeDamage(damages, playerName);
+            PlayerController player = hit.GetComponent<PlayerController>();
+            if ((player && player.PlayerId != playerName) || !player) // on vérifie que le joueurs ne s'attaque pas lui meme (si bug latence)
+            {
+                collision = true;
+                lifeB.TakeDamage(damages, playerName);
+
+                Destroy(gameObject);
+            }
+        }
+        else
+        {
+            Destroy(gameObject);
         }
 
-        Destroy(gameObject);
     }
 
     public void Init(int damage, string shootingPlayerName)

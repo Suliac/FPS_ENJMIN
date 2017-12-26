@@ -62,8 +62,8 @@ public class EvilController : NetworkBehaviour
             {
                 CmdFindNextPosition();
             }
-            
-            if(returnToInitPosition)
+
+            if (returnToInitPosition)
             {
                 float distanceToInitPos = (initPosition - transform.position).magnitude;
                 if (distanceToInitPos < 0.5f)
@@ -81,11 +81,11 @@ public class EvilController : NetworkBehaviour
                 }
             }
 
-            float distanceToPlayer = (nearestPosition - transform.position).magnitude;
             if (na && na.enabled)
             {
                 currentTimePunch = 0;
                 na.SetDestination(nearestPosition);
+                float distanceToPlayer = (nearestPosition - transform.position).magnitude;
 
                 if (distanceToPlayer <= AttackDistance && target != null)
                 {
@@ -104,6 +104,7 @@ public class EvilController : NetworkBehaviour
                         }
 
                         returnToInitPosition = true;
+                        target = null;
                     }
                 }
                 else
@@ -141,7 +142,7 @@ public class EvilController : NetworkBehaviour
         na.Warp(initPosition);
         isInit = true;
     }
-    
+
 
     [Command]
     public void CmdFindNextPosition()
@@ -150,7 +151,7 @@ public class EvilController : NetworkBehaviour
             return; // normalement useless, si commande on est deja sur le serveur
 
         Vector3 tmpNearestPosition = initPosition;
-        if (returnToInitPosition) // Quand le zombie doit retourner a sa position, on ne veut pas qu'il continue de cherhcher des cibles pendant ce temps
+        if (!returnToInitPosition) // Quand le zombie doit retourner a sa position, on ne veut pas qu'il continue de cherhcher des cibles pendant ce temps
         {
             target = null;
             foreach (var player in playersReachable)
@@ -160,7 +161,7 @@ public class EvilController : NetworkBehaviour
                     target = player;
                     tmpNearestPosition = new Vector3(player.transform.position.x, player.transform.position.y, player.transform.position.z);
                 }
-            } 
+            }
         }
 
         nearestPosition = tmpNearestPosition;

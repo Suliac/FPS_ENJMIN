@@ -293,7 +293,13 @@ public class PlayerController : NetworkBehaviour
                     if (currentWeapons[weaponIndex].CurrentAmmo > 0 || currentWeapons[weaponIndex].MaxAmmo == -1) // NB : -1 maxammo = infinite ammo
                     {
                         currentWeapons[weaponIndex].CurrentAmmo--;
-                        CmdFire(weaponIndex, currentWeapons[weaponIndex].FirePosition.position);
+
+                        Vector3 firePos = currentWeapons[weaponIndex].FirePosition.position;
+                        if(isRunning)
+                        {
+                            firePos -= currentWeapons[weaponIndex].FirePosition.right; // orientation bizarre dans les prefab de joueur
+                        }
+                        CmdFire(weaponIndex, firePos);
                     }
                     deltaTimeShooting -= isFirstShoot ? currentWeapons[weaponIndex].AnimationTimePreparation : currentWeapons[weaponIndex].RateOfFire;
                     isFirstShoot = false;

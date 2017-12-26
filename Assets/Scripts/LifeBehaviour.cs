@@ -22,6 +22,28 @@ public class LifeBehaviour : NetworkBehaviour
         //playerController = gameObject.GetComponent<PlayerController>();
     }
 
+    public void Suicide(string playerId)
+    {
+        if (!isServer)
+            return;
+
+        Health = 0;
+        if (Health <= 0)
+        {
+            if (!isZombie)
+            {
+                InGameManager.RemoveFrag(playerId);
+            }
+
+            Health = MaxHealth;
+
+            if (DestroyOnDeath)
+                Destroy(gameObject);
+            else
+                RpcRespawn();
+        }
+    }
+
     public void TakeDamage(int amount, string shootingPlayerName)
     {
         if (!isServer)

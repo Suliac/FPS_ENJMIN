@@ -1089,10 +1089,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   UpdateIA: 0
-  AttackDistance: 5
+  AttackDistance: 4
   DetectDistance: 15
   AttackSpeed: 1
-  Damages: 50
+  Damages: 1000
   DeathEffect: {fileID: 0}
 --- !u!114 &114634090785982388
 MonoBehaviour:
