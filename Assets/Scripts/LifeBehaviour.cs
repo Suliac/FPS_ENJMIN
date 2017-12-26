@@ -10,7 +10,12 @@ public class LifeBehaviour : NetworkBehaviour
     public const float RespawnTimeSeconds = 2.0f;
     public bool DestroyOnDeath;
 
+    private Animator animator;
     private GameObject startPosition;
+
+    [SyncVar]
+    private bool dying = false;
+    public bool Dying { get { return dying; } }
     //private PlayerController playerController;
 
     [SyncVar]
@@ -19,6 +24,7 @@ public class LifeBehaviour : NetworkBehaviour
     void Awake()
     {
         startPosition = GameObject.Find("StartPosition");
+        animator = GetComponentInChildren<Animator>();
         //playerController = gameObject.GetComponent<PlayerController>();
     }
 
@@ -27,20 +33,23 @@ public class LifeBehaviour : NetworkBehaviour
         if (!isServer)
             return;
 
-        Health = 0;
-        if (Health <= 0)
+        if (!dying)
         {
-            if (!isZombie)
+            dying = true;
+            Health = 0;
+            if (Health <= 0)
             {
-                InGameManager.RemoveFrag(playerId);
+                if (!isZombie)
+                {
+                    InGameManager.RemoveFrag(playerId);
+                }
+
+                Health = MaxHealth;
+                if (animator)
+                    animator.SetTrigger("Death");
+                else
+                    Death();
             }
-
-            Health = MaxHealth;
-
-            if (DestroyOnDeath)
-                Destroy(gameObject);
-            else
-                RpcRespawn();
         }
     }
 
@@ -49,21 +58,23 @@ public class LifeBehaviour : NetworkBehaviour
         if (!isServer)
             return;
 
-        Health -= amount;
-        if (Health <= 0)
+        if (!dying)
         {
-            //Frag
-            if (!isZombie && !shootingPlayerName.Equals("zombie"))
+            Health -= amount;
+            if (Health <= 0)
             {
-                InGameManager.NewFrag(shootingPlayerName); 
-            }
+                dying = true;
+                //Frag
+                if (!isZombie && !shootingPlayerName.Equals("zombie"))
+                {
+                    InGameManager.NewFrag(shootingPlayerName);
+                }
 
-            Health = MaxHealth;
-
-            if (DestroyOnDeath)
-                Destroy(gameObject);
-            else
-                RpcRespawn();
+                if (animator)
+                    RpcDeathAnim();
+                else
+                    Death();
+            } 
         }
     }
 
@@ -77,15 +88,44 @@ public class LifeBehaviour : NetworkBehaviour
     }
 
     [ClientRpc]
+    void RpcDeathAnim()
+    {
+        animator.SetTrigger("Death");
+    }
+
+    [ClientRpc]
     void RpcRespawn()
     {
         if (isLocalPlayer)
         {
             transform.position = startPosition.transform.position;
-
-            // Respawn the player after 'RespawnTime' seconds
-            //StartCoroutine(Respawn(RespawnTimeSeconds));
+            //PlayerController controller = GetComponent<PlayerController>();
+            //if(controller)
+            //{
+            //    controller.InitWeapon();
+            //}
         }
+    }
+
+    public void OnEndDeathAnim()
+    {
+        print("OnEndDeathAnim");
+
+        if (!isServer)
+            return;
+
+        Death();
+    }
+
+    private void Death()
+    {
+        print("death");
+        Health = MaxHealth;
+        dying = false;
+        if (DestroyOnDeath)
+            Destroy(gameObject);
+        else
+            RpcRespawn();
     }
 
     //IEnumerator Respawn(float timeRespawn)

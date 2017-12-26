@@ -226,6 +226,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4182747816471658}
   - component: {fileID: 95997239112032696}
+  - component: {fileID: 114270841603305684}
   m_Layer: 0
   m_Name: ZombieDummy
   m_TagString: Untagged
@@ -1094,6 +1095,17 @@ MonoBehaviour:
   AttackSpeed: 1
   Damages: 1000
   DeathEffect: {fileID: 0}
+--- !u!114 &114270841603305684
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1625800174483526}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a5620d7aa061d344bb6a71242b33f9c9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!114 &114634090785982388
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -1125,7 +1137,7 @@ MonoBehaviour:
     i14: 216
     i15: 58
   m_ServerOnly: 0
-  m_LocalPlayerAuthority: 0
+  m_LocalPlayerAuthority: 1
 --- !u!114 &114848639067478840
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -1137,8 +1149,8 @@ MonoBehaviour:
   m_Script: {fileID: -1768714887, guid: dc443db3e92b4983b9738c1131f555cb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_TransformSyncMode: 3
-  m_SendInterval: 0
+  m_TransformSyncMode: 1
+  m_SendInterval: 0.2
   m_SyncRotationAxis: 7
   m_RotationSyncCompression: 0
   m_SyncSpin: 0
@@ -1199,7 +1211,7 @@ NavMeshAgent:
   m_Acceleration: 8
   avoidancePriority: 50
   m_AngularSpeed: 200
-  m_StoppingDistance: 0
+  m_StoppingDistance: 1.5
   m_AutoTraverseOffMeshLink: 1
   m_AutoBraking: 1
   m_AutoRepath: 1

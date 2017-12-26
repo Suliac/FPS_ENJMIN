@@ -130,11 +130,6 @@ public class WeaponPickup : NetworkBehaviour
         WeaponId = initWeaponId;
     }
     
-    [Command]
-    public void CmdSpawnZombie()
-    {
-
-    }
 
     void OnTriggerEnter(Collider col)
     {

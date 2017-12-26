@@ -111,10 +111,7 @@ public class PlayerController : NetworkBehaviour
         shootArmRot = Camera.localRotation;
         shootLeftArmRot = Camera.localRotation;
         charTargetRot = transform.localRotation;
-
-        weaponIndex = -1;
-        nextWeaponWanted = 0;
-
+        
         if (!isLocalPlayer)
         {
             Camera.gameObject.SetActive(false);
@@ -133,6 +130,14 @@ public class PlayerController : NetworkBehaviour
             UiFrags.text = "0";
         }
 
+        InitWeapon();
+    }
+
+    public void InitWeapon()
+    {
+        weaponIndex = -1;
+        nextWeaponWanted = 0;
+
         for (int i = 0; i < WeaponsAvailable.Count; i++)
         {
             WeaponsAvailable[i].CurrentAmmo = WeaponsAvailable[i].MaxAmmo;
@@ -145,6 +150,9 @@ public class PlayerController : NetworkBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (lifeScript && lifeScript.Dying)
+            return;
+
         if (!GameInfoHandler.GameOver)
         {
             Animate();
@@ -173,6 +181,9 @@ public class PlayerController : NetworkBehaviour
 
     private void FixedUpdate()
     {
+        if (lifeScript && lifeScript.Dying)
+            return;
+
         if (!GameInfoHandler.GameOver)
         {
             if (!isLocalPlayer)

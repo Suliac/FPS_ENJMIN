@@ -6,8 +6,6 @@ using UnityEngine.Networking;
 
 public class EvilController : NetworkBehaviour
 {
-
-    private GameObject[] players;
     private List<GameObject> playersReachable;
     private bool run = false;
 
@@ -35,15 +33,42 @@ public class EvilController : NetworkBehaviour
     private float currentTimePunch = 0.0f;
     private bool isInit = false;
     private bool wasWalkingBefore = false;
+
+    private LifeBehaviour life;
     // Use this for initialization
     void Start()
     {
         //initPosition = transform.position;
-        //players = GameObject.FindGameObjectsWithTag("Player");
+        life = GetComponent<LifeBehaviour>();
         playersReachable = new List<GameObject>();
         animator = GetComponentInChildren<Animator>();
         UpdateIA = Random.value;
         GetComponent<Rigidbody>().isKinematic = true;
+
+        var players = GameObject.FindGameObjectsWithTag("Player");
+        foreach (var player in players) // detection des joueurs qui sont déja dans le champs de détection (mais qui n'ont donc pas déclenché le trigger)
+        {
+            var dist = (player.transform.position - transform.position).magnitude;
+            if (dist <= DetectDistance)
+            {
+                playersReachable.Add(player);
+            }
+        }
+
+        if (initPosition != null && initPosition != Vector3.zero && !isInit)
+        {
+            print("init mano car player arrive apres spawn");
+            NavMeshAgent na = GetComponent<NavMeshAgent>();
+
+            if (!na.enabled) // Si il n'y a plus de NavMeshAgent
+            {
+                GetComponent<NavMeshAgent>().enabled = true;
+                GetComponent<Rigidbody>().isKinematic = true;
+            }
+
+            na.Warp(initPosition);
+            isInit = true;
+        }
     }
 
     // Update is called once per frame
@@ -52,76 +77,86 @@ public class EvilController : NetworkBehaviour
         if (!isInit)
             return;
 
-        UpdateIA += Time.deltaTime;
-
-        if (UpdateIA > UpdateIAPeriod)
+        if (!life.Dying)
         {
-            UpdateIA = 0.0f;
+            UpdateIA += Time.deltaTime;
 
-            if (isServer) // On veut que la destination ne soit choisie que sur le serveur mais que ca soit les clients qui gèrent le déplacement
+            if (UpdateIA > UpdateIAPeriod)
             {
-                CmdFindNextPosition();
-            }
+                UpdateIA = 0.0f;
 
-            if (returnToInitPosition)
-            {
-                float distanceToInitPos = (initPosition - transform.position).magnitude;
-                if (distanceToInitPos < 0.5f)
-                    returnToInitPosition = false;
-            }
-
-            NavMeshAgent na = GetComponent<NavMeshAgent>();
-
-            if (!na.enabled) // Si il n'y a plus de NavMeshAgent
-            {
-                if (GetComponent<Rigidbody>().velocity.magnitude < 0.5f) // Si la magnitude de la vitesse < 0.5 = si immobile
+                if (isServer) // On veut que la destination ne soit choisie que sur le serveur mais que ca soit les clients qui gèrent le déplacement
                 {
-                    GetComponent<NavMeshAgent>().enabled = true;
-                    GetComponent<Rigidbody>().isKinematic = true;
+                    CmdFindNextPosition();
                 }
-            }
 
-            if (na && na.enabled)
-            {
-                currentTimePunch = 0;
-                na.SetDestination(nearestPosition);
-                float distanceToPlayer = (nearestPosition - transform.position).magnitude;
-
-                if (distanceToPlayer <= AttackDistance && target != null)
+                if (returnToInitPosition)
                 {
-                    na.isStopped = true;
-                    transform.LookAt(new Vector3(nearestPosition.x, transform.position.y, nearestPosition.z));
+                    float distanceToInitPos = (initPosition - transform.position).magnitude;
+                    if (distanceToInitPos < 0.5f)
+                        returnToInitPosition = false;
+                }
 
-                    //Ennemi OS le joueur
-                    if (isServer)
+                NavMeshAgent na = GetComponent<NavMeshAgent>();
+
+                if (!na.enabled) // Si il n'y a plus de NavMeshAgent
+                {
+                    if (GetComponent<Rigidbody>().velocity.magnitude < 0.5f) // Si la magnitude de la vitesse < 0.5 = si immobile
                     {
-                        print("Should damage");
-                        LifeBehaviour lifeB = target.transform.GetComponent<LifeBehaviour>(); // NB : Collision fonctionne par car joueur kinematic
-                        if (lifeB != null)
-                        {
-                            //print("damage from zombie");
-                            lifeB.TakeDamage(Damages, "zombie");
-                        }
-
-                        returnToInitPosition = true;
-                        target = null;
+                        GetComponent<NavMeshAgent>().enabled = true;
+                        GetComponent<Rigidbody>().isKinematic = true;
                     }
                 }
-                else
+
+                if (na && na.enabled)
                 {
-                    na.isStopped = false;
+                    currentTimePunch = 0;
+                    na.SetDestination(nearestPosition);
+                    float distanceToPlayer = (nearestPosition - transform.position).magnitude;
+
+                    if (distanceToPlayer <= AttackDistance && target != null)
+                    {
+                        na.isStopped = true;
+                        transform.LookAt(new Vector3(nearestPosition.x, transform.position.y, nearestPosition.z));
+
+                        //Ennemi OS le joueur
+                        if (isServer)
+                        {
+                            print("Should damage");
+                            LifeBehaviour lifeB = target.transform.GetComponent<LifeBehaviour>(); // NB : Collision fonctionne par car joueur kinematic
+                            if (lifeB != null)
+                            {
+                                //print("damage from zombie");
+                                lifeB.TakeDamage(Damages, "zombie");
+                            }
+
+                            playersReachable.Remove(target);
+                            na.SetDestination(initPosition);
+                            returnToInitPosition = true;
+                            target = null;
+                        }
+                    }
+                    else
+                    {
+                        na.isStopped = false;
+                    }
                 }
+
+
+                run = na.desiredVelocity.magnitude > 0.5f;
+                if (wasWalkingBefore != run)
+                {
+                    animator.SetBool("IsWalking", run);
+                }
+
+
+                wasWalkingBefore = run;
             }
-
-
-            run = na.desiredVelocity.magnitude > 0.5f;
-            if (wasWalkingBefore != run)
-            {
-                animator.SetBool("IsWalking", run);
-            }
-
-
-            wasWalkingBefore = run;
+        }
+        else
+        {
+            GetComponent<NavMeshAgent>().enabled = false;
+            GetComponent<Rigidbody>().isKinematic = false;
         }
 
 
@@ -189,6 +224,9 @@ public class EvilController : NetworkBehaviour
 
         if (col.gameObject.CompareTag("Player"))
         {
+            if (playersReachable == null)
+                playersReachable = new List<GameObject>();
+
             if (!playersReachable.Contains(col.gameObject))
             {
                 //Debug.Log("Player enter trigger");
@@ -209,5 +247,11 @@ public class EvilController : NetworkBehaviour
                 playersReachable.Remove(col.gameObject);
             }
         }
+    }
+
+
+    public void OnEndDeathAnim()
+    {
+
     }
 }

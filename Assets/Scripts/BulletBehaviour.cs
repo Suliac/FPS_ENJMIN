@@ -17,6 +17,7 @@ public class BulletBehaviour : MonoBehaviour
             PlayerController player = hit.GetComponent<PlayerController>();
             if ((player && player.PlayerId != playerName) || !player) // on vérifie que le joueurs ne s'attaque pas lui meme (si bug latence)
             {
+                //print("Hit !");
                 collision = true;
                 lifeB.TakeDamage(damages, playerName);
 

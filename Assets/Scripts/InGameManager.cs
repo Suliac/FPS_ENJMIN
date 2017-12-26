@@ -51,7 +51,7 @@ public class InGameManager : NetworkBehaviour
                 }
             }
 
-            dtTestPlayerDisconnect -= TimeBetweenTest;
+            dtTestPlayerDisconnect -= TimeBetweenTest;            
         }
 
         var players = new Dictionary<string, PlayerController>(toNotify);
@@ -60,7 +60,7 @@ public class InGameManager : NetworkBehaviour
             if (player.Value.transform.position.y < -2)
             {
                 LifeBehaviour life = player.Value.gameObject.GetComponent<LifeBehaviour>();
-                if(life)
+                if (life)
                 {
                     life.Suicide(player.Key);
                 }

@@ -102,6 +102,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4004764471281078}
   - component: {fileID: 95805348378536736}
+  - component: {fileID: 114123210385275250}
   m_Layer: 0
   m_Name: PlayerDummy
   m_TagString: Untagged
@@ -2078,6 +2079,17 @@ MonoBehaviour:
   XSensitivity: 2
   YSensitivity: 2
   GravityMultiplier: 2
+--- !u!114 &114123210385275250
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1084054900166410}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a5620d7aa061d344bb6a71242b33f9c9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!114 &114227534643148832
 MonoBehaviour:
   m_ObjectHideFlags: 1
