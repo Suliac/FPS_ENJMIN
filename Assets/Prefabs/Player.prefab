@@ -2122,6 +2122,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b947ac4c620766c43899459c75dce901, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  isZombie: 0
   DestroyOnDeath: 0
   Health: 100
 --- !u!114 &114814454995524998

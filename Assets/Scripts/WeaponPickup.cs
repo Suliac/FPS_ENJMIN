@@ -108,11 +108,15 @@ public class WeaponPickup : NetworkBehaviour
 
                 chestOpenned = true;
 
-                //if (isServer)
-                //{
-                //    GameObject newPickup = (GameObject)Instantiate(Zombie, transform.position, Quaternion.identity);
-                //    NetworkServer.Spawn(Zombie);
-                //}
+                // Spawn Evil when the chest opens
+                if (isServer)
+                {
+                    GameObject zombie = (GameObject)Instantiate(Zombie, transform.position, Quaternion.identity);
+                    NetworkServer.Spawn(zombie);
+                    EvilController evilController = zombie.GetComponent<EvilController>();
+                    if (evilController)
+                        evilController.RpcInit(transform.position);
+                }
             }
         }
 

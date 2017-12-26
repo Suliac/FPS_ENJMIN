@@ -145,6 +145,8 @@ GameObject:
   - component: {fileID: 114939885871508344}
   - component: {fileID: 114122740635130074}
   - component: {fileID: 195396792221438128}
+  - component: {fileID: 135914915583990398}
+  - component: {fileID: 136457499313563888}
   m_Layer: 0
   m_Name: Zombie
   m_TagString: Untagged
@@ -223,6 +225,7 @@ GameObject:
   serializedVersion: 5
   m_Component:
   - component: {fileID: 4182747816471658}
+  - component: {fileID: 95997239112032696}
   m_Layer: 0
   m_Name: ZombieDummy
   m_TagString: Untagged
@@ -531,7 +534,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1278943331132970}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 78.401505, y: 0, z: -42.899284}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 4182747816471658}
@@ -1057,6 +1060,23 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!95 &95997239112032696
+Animator:
+  serializedVersion: 3
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1625800174483526}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: d1fa5bc301eaaf14e80b6e31af23f20e, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
 --- !u!114 &114122740635130074
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -1069,6 +1089,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   UpdateIA: 0
+  AttackDistance: 5
   DetectDistance: 15
   AttackSpeed: 1
   Damages: 50
@@ -1117,7 +1138,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_TransformSyncMode: 3
-  m_SendInterval: 0.1
+  m_SendInterval: 0
   m_SyncRotationAxis: 7
   m_RotationSyncCompression: 0
   m_SyncSpin: 0
@@ -1137,8 +1158,34 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b947ac4c620766c43899459c75dce901, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  isZombie: 1
   DestroyOnDeath: 1
   Health: 50
+--- !u!135 &135914915583990398
+SphereCollider:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1278943331132970}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 1
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Radius: 20
+  m_Center: {x: 0, y: 1.5, z: 0}
+--- !u!136 &136457499313563888
+CapsuleCollider:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1278943331132970}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  m_Radius: 1
+  m_Height: 3.5
+  m_Direction: 1
+  m_Center: {x: 0, y: 1.79, z: 0}
 --- !u!195 &195396792221438128
 NavMeshAgent:
   m_ObjectHideFlags: 1
@@ -1148,10 +1195,10 @@ NavMeshAgent:
   m_Enabled: 1
   m_AgentTypeID: 0
   m_Radius: 0.5
-  m_Speed: 3.5
+  m_Speed: 8
   m_Acceleration: 8
   avoidancePriority: 50
-  m_AngularSpeed: 120
+  m_AngularSpeed: 200
   m_StoppingDistance: 0
   m_AutoTraverseOffMeshLink: 1
   m_AutoBraking: 1

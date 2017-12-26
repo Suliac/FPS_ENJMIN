@@ -609,11 +609,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 714881581ff5adb40961cf7c2a17b640, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  Zombie: {fileID: 1278943331132970, guid: 524b47547714a1d44bac1850e720d83a, type: 2}
   FallingSpeed: 50
+  LifeAmount: 25
   Type: 0
-  RifleMini: {fileID: 0}
-  LaserMini: {fileID: 0}
-  AmmoMini: {fileID: 0}
 --- !u!114 &114740316805877296
 MonoBehaviour:
   m_ObjectHideFlags: 1

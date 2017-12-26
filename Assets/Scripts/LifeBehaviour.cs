@@ -5,7 +5,7 @@ using UnityEngine.Networking;
 
 public class LifeBehaviour : NetworkBehaviour
 {
-
+    public bool isZombie = false;
     public const int MaxHealth = 100;
     public const float RespawnTimeSeconds = 2.0f;
     public bool DestroyOnDeath;
@@ -31,7 +31,10 @@ public class LifeBehaviour : NetworkBehaviour
         if (Health <= 0)
         {
             //Frag
-            InGameManager.NewFrag(shootingPlayerName);
+            if (!isZombie && !shootingPlayerName.Equals("zombie"))
+            {
+                InGameManager.NewFrag(shootingPlayerName); 
+            }
 
             Health = MaxHealth;
 
