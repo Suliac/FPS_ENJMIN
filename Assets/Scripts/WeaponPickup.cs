@@ -16,6 +16,10 @@ public class WeaponPickup : NetworkBehaviour
     public GameObject Zombie;
     public float FallingSpeed = 100.0f;
     public int LifeAmount = 25;
+    
+    public AudioClip LandSound;
+
+    private AudioSource audioSource;
 
     [SyncVar]
     public PickupType Type;
@@ -41,6 +45,7 @@ public class WeaponPickup : NetworkBehaviour
     void Awake()
     {
         anim = transform.GetComponentInChildren<Animator>();
+        audioSource = GetComponent<AudioSource>();
     }
 
     void Start()
@@ -64,19 +69,20 @@ public class WeaponPickup : NetworkBehaviour
         {
             dtOpenChest = 0;
             transform.position = endPosition;
-            goodPos = true; // avoid to update at each frame                 
+            goodPos = true; // avoid to update at each frame 
+            CmdPlaySound();
         }
 
         if (goodPos && !chestOpenned)
         {
-            if(!animLaunched)
+            if (!animLaunched)
             {
                 anim.SetTrigger("OpenChest");
                 animLaunched = true;
             }
 
             dtOpenChest += Time.fixedDeltaTime;
-            
+
             if (dtOpenChest > 1.0f)
             {
                 //Debug.Log("Cool");
@@ -121,7 +127,7 @@ public class WeaponPickup : NetworkBehaviour
         }
 
     }
-    
+
     [ClientRpc]
     public void RpcInit(Vector3 initEndPosition, PickupType initType, int initWeaponId)
     {
@@ -129,7 +135,7 @@ public class WeaponPickup : NetworkBehaviour
         Type = initType;
         WeaponId = initWeaponId;
     }
-    
+
 
     void OnTriggerEnter(Collider col)
     {
@@ -160,6 +166,8 @@ public class WeaponPickup : NetworkBehaviour
                             break;
                     }
 
+                    controller.CmdPlaySound(PlayerSound.Pick);
+
                     GameInfoHandler.DelPickup();
                     Destroy(gameObject);
                 }
@@ -169,6 +177,19 @@ public class WeaponPickup : NetworkBehaviour
         {
             Destroy(gameObject);
         }
+    }
+
+    [Command]
+    private void CmdPlaySound()
+    {
+        RpcPlayLandSound();
+    }
+    
+    [ClientRpc]
+    private void RpcPlayLandSound()
+    {
+        audioSource.clip = LandSound;
+        audioSource.Play();
     }
 
     // We need to do the coroutine on each client otherwise, the pickup seems to "stutter"

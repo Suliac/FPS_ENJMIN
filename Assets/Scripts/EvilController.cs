@@ -21,6 +21,12 @@ public class EvilController : NetworkBehaviour
     public Transform DeathEffect;
     private Animator animator;
 
+    public AudioClip AttackSound;
+    public AudioClip HurtSound;
+
+    private AudioSource audioSource;
+    private AudioSource hurtAudioSource;
+
     [SyncVar]
     private Vector3 initPosition;
     [SyncVar]
@@ -44,6 +50,10 @@ public class EvilController : NetworkBehaviour
         animator = GetComponentInChildren<Animator>();
         UpdateIA = Random.value;
         GetComponent<Rigidbody>().isKinematic = true;
+
+        var audioSources = GetComponents<AudioSource>();
+        audioSource = audioSources[0];
+        hurtAudioSource = audioSources[1];
 
         var players = GameObject.FindGameObjectsWithTag("Player");
         foreach (var player in players) // detection des joueurs qui sont déja dans le champs de détection (mais qui n'ont donc pas déclenché le trigger)
@@ -147,16 +157,15 @@ public class EvilController : NetworkBehaviour
                 if (wasWalkingBefore != run)
                 {
                     animator.SetBool("IsWalking", run);
+                    if (run)
+                    {
+                        CmdPlaySound(false);
+                    }
                 }
 
 
                 wasWalkingBefore = run;
             }
-        }
-        else
-        {
-            GetComponent<NavMeshAgent>().enabled = false;
-            GetComponent<Rigidbody>().isKinematic = false;
         }
 
 
@@ -249,9 +258,27 @@ public class EvilController : NetworkBehaviour
         }
     }
 
-
-    public void OnEndDeathAnim()
+    [Command]
+    public void CmdPlaySound(bool playHurt)
     {
-
+        if (playHurt)
+            RpcPlayHurtSound();
+        else
+            RpcPlaySound();
     }
+
+    [ClientRpc]
+    private void RpcPlaySound()
+    {
+        audioSource.clip = AttackSound;
+        audioSource.Play();
+    }
+
+    [ClientRpc]
+    private void RpcPlayHurtSound()
+    {
+        hurtAudioSource.clip = HurtSound;
+        hurtAudioSource.Play();
+    }
+
 }

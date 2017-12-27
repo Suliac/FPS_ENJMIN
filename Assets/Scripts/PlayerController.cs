@@ -15,6 +15,17 @@ public enum State
     Jumping
 }
 
+public enum PlayerSound
+{
+    FootStep,
+    Jump,
+    Land,
+    ClassicShoot,
+    LaserShoot,
+    Hurt,
+    Pick
+}
+
 [System.Serializable]
 public class Weapon
 {
@@ -37,7 +48,26 @@ public class Weapon
 public class PlayerController : NetworkBehaviour
 {
     public string PlayerId;
-    
+
+    [Range(0f, 1f)]
+    public float RunstepLenghten;
+    public float StepInterval;
+    public AudioClip[] FootstepSounds;    // an array of footstep sounds that will be randomly selected from.
+    public AudioClip JumpSound;           // the sound played when character leaves the ground.
+    public AudioClip LandSound;           // the sound played when character touches back on ground.
+    public AudioClip ClassicShootSound;
+    public AudioClip LaserGunShootSound;
+    public AudioClip HurtSound;
+    public AudioClip PickSound;
+
+    private AudioSource audioSource;
+    private AudioSource shootAudioSource;
+    private AudioSource hurtAudioSource;
+
+    private float stepCycle;
+    private float nextStep;
+
+
     public List<Weapon> WeaponsAvailable;
     private List<Weapon> currentWeapons;
     private int weaponIndex = 0;
@@ -98,6 +128,14 @@ public class PlayerController : NetworkBehaviour
         animator = GetComponentInChildren<Animator>();
         lifeScript = GetComponent<LifeBehaviour>();
 
+        var audioSources = GetComponents<AudioSource>();
+        audioSource = audioSources[0];
+        shootAudioSource = audioSources[1];
+        hurtAudioSource = audioSources[2];
+
+        stepCycle = 0f;
+        nextStep = stepCycle / 2f;
+
         currentWeapons = new List<Weapon>();
     }
 
@@ -111,7 +149,7 @@ public class PlayerController : NetworkBehaviour
         shootArmRot = Camera.localRotation;
         shootLeftArmRot = Camera.localRotation;
         charTargetRot = transform.localRotation;
-        
+
         if (!isLocalPlayer)
         {
             Camera.gameObject.SetActive(false);
@@ -167,6 +205,7 @@ public class PlayerController : NetworkBehaviour
             if (!isPreviouslyGrounded && characterController.isGrounded)
             {
                 moveDirection.y = 0f;
+                CmdPlaySound(PlayerSound.Land);
                 SetState(State.Jumping, false);
             }
             if (!characterController.isGrounded && !isJumping && isPreviouslyGrounded)
@@ -188,7 +227,7 @@ public class PlayerController : NetworkBehaviour
         {
             if (!isLocalPlayer)
                 return; // If the player isn't the player of the current client, we don't update his position
-            
+
             float speed = 0.0f;
 
             if (!GameInfoHandler.GamePaused)
@@ -216,7 +255,7 @@ public class PlayerController : NetworkBehaviour
                     moveDirection.y = JumpSpeed;
                     isJumping = true;
                     CmdSetState(State.Jumping, true);
-
+                    CmdPlaySound(PlayerSound.Jump);
                 }
             }
             else
@@ -230,6 +269,7 @@ public class PlayerController : NetworkBehaviour
             Camera.parent.localRotation = camTargetRot; // rotate the cam
             head.localRotation = camTargetRot;
 
+            ProgressStepCycle(speed);
             CmdMove(moveDirection, Time.fixedDeltaTime, camTargetRot, charTargetRot);
 
         }
@@ -306,11 +346,12 @@ public class PlayerController : NetworkBehaviour
                         currentWeapons[weaponIndex].CurrentAmmo--;
 
                         Vector3 firePos = currentWeapons[weaponIndex].FirePosition.position;
-                        if(isRunning)
+                        if (isRunning)
                         {
                             firePos -= currentWeapons[weaponIndex].FirePosition.right; // orientation bizarre dans les prefab de joueur
                         }
                         CmdFire(weaponIndex, firePos);
+                        CmdPlaySound(currentWeapons[weaponIndex].Name != "Lasergun" ? PlayerSound.ClassicShoot : PlayerSound.LaserShoot);
                     }
                     deltaTimeShooting -= isFirstShoot ? currentWeapons[weaponIndex].AnimationTimePreparation : currentWeapons[weaponIndex].RateOfFire;
                     isFirstShoot = false;
@@ -359,10 +400,9 @@ public class PlayerController : NetworkBehaviour
     private void Animate()
     {
         animator.SetBool("IsJumping", isJumping);
-        animator.SetBool("IsWalking", isWalking || isRunning);
+        animator.SetBool("IsWalking", isWalking);
+        animator.SetBool("IsRunning", isRunning);
         animator.SetBool("IsShooting", isShooting);
-
-
     }
 
     private void UpdateUi()
@@ -798,7 +838,8 @@ public class PlayerController : NetworkBehaviour
         CmdDisconnectPlayer(PlayerId);
     }
 
-    void OnPlayerDisconnected(NetworkPlayer player) {
+    void OnPlayerDisconnected(NetworkPlayer player)
+    {
         Debug.Log("Clean up after player " + player);
         Network.RemoveRPCs(player);
         Network.DestroyPlayerObjects(player);
@@ -808,5 +849,116 @@ public class PlayerController : NetworkBehaviour
     {
         CmdConnecting(GameInfoHandler.PlayerName);
 
+    }
+
+    [Command]
+    public void CmdPlaySound(PlayerSound soundType)
+    {
+        switch (soundType)
+        {
+            case PlayerSound.FootStep:
+                RpcPlayFootStepAudio();
+                break;
+            case PlayerSound.Jump:
+                RpcPlayJumpSound();
+                break;
+            case PlayerSound.Land:
+                RpcPlayLandingSound();
+                break;
+            case PlayerSound.ClassicShoot:
+                RpcPlayShootSound();
+                break;
+            case PlayerSound.LaserShoot:
+                RpcPlayLaserSound();
+                break;
+            case PlayerSound.Hurt:
+                RpcPlayHurtSound();
+                break;
+            case PlayerSound.Pick:
+                RpcPlayPickSound();
+                break;
+            default:
+                break;
+        }
+    }
+
+    [ClientRpc]
+    private void RpcPlayJumpSound()
+    {
+        audioSource.clip = JumpSound;
+        audioSource.Play();
+    }
+
+    [ClientRpc]
+    private void RpcPlayPickSound()
+    {
+        shootAudioSource.clip = PickSound;
+        shootAudioSource.Play();
+    }
+
+    [ClientRpc]
+    private void RpcPlayShootSound()
+    {
+        shootAudioSource.clip = ClassicShootSound;
+        shootAudioSource.Play();
+
+    }
+
+    [ClientRpc]
+    private void RpcPlayLaserSound()
+    {
+        shootAudioSource.clip = LaserGunShootSound;
+        shootAudioSource.Play();
+    }
+
+    [ClientRpc]
+    private void RpcPlayLandingSound()
+    {
+        audioSource.clip = LandSound;
+        audioSource.Play();
+        nextStep = stepCycle + .5f;
+    }
+
+    [ClientRpc]
+    private void RpcPlayHurtSound()
+    {
+        hurtAudioSource.clip = HurtSound;
+        hurtAudioSource.Play();
+    }
+
+
+    private void ProgressStepCycle(float speed)
+    {
+        if (characterController.velocity.sqrMagnitude > 0 && (input.x != 0 || input.y != 0))
+        {
+            stepCycle += (characterController.velocity.magnitude + (speed * (isWalking ? 1f : RunstepLenghten))) *
+                         Time.fixedDeltaTime;
+        }
+
+        if (!(stepCycle > nextStep))
+        {
+            return;
+        }
+
+        nextStep = stepCycle + StepInterval;
+
+        CmdPlaySound(PlayerSound.FootStep);
+    }
+
+    [ClientRpc]
+    private void RpcPlayFootStepAudio()
+    {
+        if (!characterController.isGrounded)
+        {
+            return;
+        }
+        // pick & play a random footstep sound from the array,
+        // excluding sound at index 0
+        int n = UnityEngine.Random.Range(1, FootstepSounds.Length);
+        audioSource.clip = FootstepSounds[n];
+        audioSource.PlayOneShot(audioSource.clip);
+        // move picked sound to index 0 so it's not picked next time
+        FootstepSounds[n] = FootstepSounds[0];
+        FootstepSounds[0] = audioSource.clip;
     }
 }

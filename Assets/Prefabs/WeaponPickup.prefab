@@ -142,6 +142,7 @@ GameObject:
   - component: {fileID: 114740316805877296}
   - component: {fileID: 65395576809739868}
   - component: {fileID: 114166706795662432}
+  - component: {fileID: 82001746351521070}
   m_Layer: 0
   m_Name: WeaponPickup
   m_TagString: Pickup
@@ -543,6 +544,86 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 3, y: 2.25, z: 2}
   m_Center: {x: 0, y: 0.85, z: 0}
+--- !u!82 &82001746351521070
+AudioSource:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1709200518645172}
+  m_Enabled: 1
+  serializedVersion: 4
+  OutputAudioMixerGroup: {fileID: 0}
+  m_audioClip: {fileID: 0}
+  m_PlayOnAwake: 1
+  m_Volume: 1
+  m_Pitch: 1
+  Loop: 0
+  Mute: 0
+  Spatialize: 0
+  SpatializePostEffects: 0
+  Priority: 128
+  DopplerLevel: 1
+  MinDistance: 2
+  MaxDistance: 150
+  Pan2D: 0
+  rolloffMode: 0
+  BypassEffects: 0
+  BypassListenerEffects: 0
+  BypassReverbZones: 0
+  rolloffCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 2
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+    - serializedVersion: 2
+      time: 1
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  panLevelCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 2
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 0
+  spreadCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 2
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 0
+  reverbZoneMixCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 2
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 0
 --- !u!95 &95369393051332974
 Animator:
   serializedVersion: 3
@@ -612,6 +693,8 @@ MonoBehaviour:
   Zombie: {fileID: 1278943331132970, guid: 524b47547714a1d44bac1850e720d83a, type: 2}
   FallingSpeed: 50
   LifeAmount: 25
+  PickSound: {fileID: 8300000, guid: 26b97ad176cde5642851255e0870e723, type: 3}
+  LandSound: {fileID: 8300000, guid: 3b09d59f4499d45428baa7a21e954296, type: 3}
   Type: 0
 --- !u!114 &114740316805877296
 MonoBehaviour:

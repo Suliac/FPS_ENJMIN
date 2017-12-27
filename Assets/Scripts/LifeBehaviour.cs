@@ -12,11 +12,14 @@ public class LifeBehaviour : NetworkBehaviour
 
     private Animator animator;
     private GameObject startPosition;
+    
 
     [SyncVar]
     private bool dying = false;
     public bool Dying { get { return dying; } }
-    //private PlayerController playerController;
+
+    private PlayerController playerController;
+    private EvilController zombieController;
 
     [SyncVar]
     public int Health = MaxHealth;
@@ -25,7 +28,12 @@ public class LifeBehaviour : NetworkBehaviour
     {
         startPosition = GameObject.Find("StartPosition");
         animator = GetComponentInChildren<Animator>();
-        //playerController = gameObject.GetComponent<PlayerController>();
+
+        if (isZombie)
+            zombieController = GetComponent<EvilController>();
+        else
+            playerController = GetComponent<PlayerController>();
+       
     }
 
     public void Suicide(string playerId)
@@ -43,7 +51,7 @@ public class LifeBehaviour : NetworkBehaviour
                 {
                     InGameManager.RemoveFrag(playerId);
                 }
-
+                PlaySound();
                 Health = MaxHealth;
                 if (animator)
                     animator.SetTrigger("Death");
@@ -61,6 +69,7 @@ public class LifeBehaviour : NetworkBehaviour
         if (!dying)
         {
             Health -= amount;
+            PlaySound();
             if (Health <= 0)
             {
                 dying = true;
@@ -69,12 +78,12 @@ public class LifeBehaviour : NetworkBehaviour
                 {
                     InGameManager.NewFrag(shootingPlayerName);
                 }
-
+                
                 if (animator)
                     RpcDeathAnim();
                 else
                     Death();
-            } 
+            }
         }
     }
 
@@ -107,6 +116,16 @@ public class LifeBehaviour : NetworkBehaviour
         }
     }
 
+    
+    private void PlaySound()
+    {
+        if (isZombie)
+            zombieController.CmdPlaySound(true);
+        else
+            playerController.CmdPlaySound(PlayerSound.Hurt);
+
+    }
+    
     public void OnEndDeathAnim()
     {
         print("OnEndDeathAnim");
