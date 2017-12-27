@@ -3,7 +3,7 @@
 Cake Arena est un shooter de survie TPS, **en ligne**. Les joueurs doivent donc rejoindre un serveur créé par l'un d'entre eux.
 Très inspiré de Quake, le but est d'être le premier à atteindre 20kills.
 
-##Online
+## Online
 J'ai utilisé le framework réseau (Unet) mis a disposition par Unity.
 Les joueurs doivent entrer l'IP de l'host du serveur.
 La gestion de la vie, des dégâts, de la mort et des améioration (armes etc...) sont gérés sur le serveur.
