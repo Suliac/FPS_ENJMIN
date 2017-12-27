@@ -340,7 +340,7 @@ MeshRenderer:
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
   m_Materials:
-  - {fileID: 10100, guid: 0000000000000000e000000000000000, type: 0}
+  - {fileID: 2100000, guid: ceb3c1d87d90ce14fb22022d20911bb3, type: 3}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -675,7 +675,7 @@ TextMesh:
   m_FontSize: 0
   m_FontStyle: 0
   m_RichText: 1
-  m_Font: {fileID: 10102, guid: 0000000000000000e000000000000000, type: 0}
+  m_Font: {fileID: 12800000, guid: ceb3c1d87d90ce14fb22022d20911bb3, type: 3}
   m_Color:
     serializedVersion: 2
     rgba: 4294967295
@@ -693,7 +693,6 @@ MonoBehaviour:
   Zombie: {fileID: 1278943331132970, guid: 524b47547714a1d44bac1850e720d83a, type: 2}
   FallingSpeed: 50
   LifeAmount: 25
-  PickSound: {fileID: 8300000, guid: 26b97ad176cde5642851255e0870e723, type: 3}
   LandSound: {fileID: 8300000, guid: 3b09d59f4499d45428baa7a21e954296, type: 3}
   Type: 0
 --- !u!114 &114740316805877296
