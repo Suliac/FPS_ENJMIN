@@ -1,7 +1,7 @@
 # Cake Arena (Projet Unity ENJMIN Master1)
 
 Cake Arena est un shooter de survie TPS, **en ligne**. Les joueurs doivent donc rejoindre un serveur créé par l'un d'entre eux.
-Très inspiré de Quake, le but est d'être le premier à atteindre 20kills.
+Très inspiré de Quake, le but est d'être le premier à atteindre 5kills.
 
 ## Commandes
 * ZQSD 			: Se déplacer
@@ -19,7 +19,7 @@ Le comportements des PNJ est "lancé" depuis le serveur mais pour éviter des ef
 ## Amélioration et Zombies (PNJ)
 Des améliorations tombent au hasard sur la carte permettant de débloquer des armes, des munitions ou de récupérer de la vie.
 Il ne peut y avoir que 10 améliorations à la fois sur la carte et elles tombent toutes les 15sec.
-Les munitions ne donnent que des munitions (et pas les armes si elles ne sont pas débloquées)
+Les munitions ne donnent que des munitions (et pas les armes si elles ne sont pas débloquées).
 Les pickups armes ne donnent des munitions que lors du premier déblocage de l'arme.
 Ces améliorations sont protégées par des "zombies" qui viennent attaquer les joueurs qui s'approchent.
 Leur seule attaque est au corps à corps, mais si un zombie touche un joueur il le one-shot.
