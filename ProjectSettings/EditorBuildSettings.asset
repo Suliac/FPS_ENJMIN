@@ -5,12 +5,6 @@ EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Scenes:
-  - enabled: 0
-    path: Assets/Scenes/test_lobby_multiplayer.unity
-    guid: f60f02f8ecdd68240bc954cdc40f4ff2
-  - enabled: 0
-    path: Assets/Scenes/test_multiplayer.unity
-    guid: e3c35bbcafe41474a9ef90710b82439d
   - enabled: 1
     path: Assets/Scenes/survival_mode_scene.unity
     guid: 27275f39935e64c4f8f65b6d8444168c

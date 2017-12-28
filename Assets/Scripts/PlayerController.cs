@@ -23,7 +23,8 @@ public enum PlayerSound
     ClassicShoot,
     LaserShoot,
     Hurt,
-    Pick
+    Pick,
+    NoAmmo
 }
 
 [System.Serializable]
@@ -59,6 +60,7 @@ public class PlayerController : NetworkBehaviour
     public AudioClip LaserGunShootSound;
     public AudioClip HurtSound;
     public AudioClip PickSound;
+    public AudioClip NoAmmoSound;
 
     private AudioSource audioSource;
     private AudioSource shootAudioSource;
@@ -352,6 +354,11 @@ public class PlayerController : NetworkBehaviour
                         }
                         CmdFire(weaponIndex, firePos);
                         CmdPlaySound(currentWeapons[weaponIndex].Name != "Lasergun" ? PlayerSound.ClassicShoot : PlayerSound.LaserShoot);
+                    }
+                    else
+                    {
+                        // Plus de munition
+                        CmdPlaySound(PlayerSound.NoAmmo);
                     }
                     deltaTimeShooting -= isFirstShoot ? currentWeapons[weaponIndex].AnimationTimePreparation : currentWeapons[weaponIndex].RateOfFire;
                     isFirstShoot = false;
@@ -877,6 +884,9 @@ public class PlayerController : NetworkBehaviour
             case PlayerSound.Pick:
                 RpcPlayPickSound();
                 break;
+            case PlayerSound.NoAmmo:
+                RpcPlaynoAmmoSound();
+                break;
             default:
                 break;
         }
@@ -926,6 +936,12 @@ public class PlayerController : NetworkBehaviour
         hurtAudioSource.Play();
     }
 
+    [ClientRpc]
+    private void RpcPlaynoAmmoSound()
+    {
+        shootAudioSource.clip = NoAmmoSound;
+        shootAudioSource.Play();
+    }
 
     private void ProgressStepCycle(float speed)
     {

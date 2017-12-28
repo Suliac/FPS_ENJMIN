@@ -18,6 +18,7 @@ public class GameInfoHandler : MonoBehaviour
         instance._Frags = new Dictionary<string, int>();
         instance._NbRdyGameOver = 0;
         instance._NameTaken = false;
+        instance._NumberPickup = 0;
     }
 
     #region GameStates

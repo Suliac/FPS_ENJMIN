@@ -2204,6 +2204,7 @@ MonoBehaviour:
   LaserGunShootSound: {fileID: 8300000, guid: e5ffe5ad56ed84f80b79cf081c6d0209, type: 3}
   HurtSound: {fileID: 8300000, guid: b01964d66bfc6914b93a55a2538634f9, type: 3}
   PickSound: {fileID: 8300000, guid: 26b97ad176cde5642851255e0870e723, type: 3}
+  NoAmmoSound: {fileID: 8300000, guid: b0040cfcf90ca8b48b5831061fe6762e, type: 3}
   WeaponsAvailable:
   - Name: Gun
     Id: 0
