@@ -1,12 +1,13 @@
 # Cake Arena (Projet Unity ENJMIN Master1)
 
 Cake Arena est un shooter de survie TPS, **en ligne**. Les joueurs doivent donc rejoindre un serveur créé par l'un d'entre eux.
-Très inspiré de Quake, le but est d'être le premier à atteindre 5kills.
+Inspiré de Quake, le but est d'être le premier à atteindre 5kills.
 
 ## Builds & vidéos
 * Trailer  : https://youtu.be/KhOeaI2NKdE
 * Gameplay : https://youtu.be/jHBr9b0s_7U
-* Build    : CakeArena.7z à la racine du projet
+* Build    : CakeArena.7z à la racine du projet (https://github.com/Suliac/FPS_ENJMIN/blob/master/CakeArena.7z)
+* GitHub   : https://github.com/Suliac/FPS_ENJMIN
 
 ## Commandes
 * ZQSD 			: Se déplacer
