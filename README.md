@@ -3,6 +3,11 @@
 Cake Arena est un shooter de survie TPS, **en ligne**. Les joueurs doivent donc rejoindre un serveur créé par l'un d'entre eux.
 Très inspiré de Quake, le but est d'être le premier à atteindre 5kills.
 
+## Builds & vidéos
+Trailer  : 
+Gameplay :
+Build    : CakeArena.7z à la racine du projet
+
 ## Commandes
 * ZQSD 			: Se déplacer
 * Clic gauche 	: Tirer
@@ -27,8 +32,9 @@ Les joueurs ne sont pas obligé de tuer les zombies pour récupérer l'améliora
 Un zombie attaque le joueur le plus proche : les joueurs peuvent jouer avec ça pour ammener les zombies sur d'autres joueurs.
 
 ## Armes
-A sa mort, un joueur perd toutes ses armes et repart avec le pistolet de base (munitions illimitées)
-Il y à trois armes différentes :
+A sa mort, un joueur perd toutes ses armes et repart avec le pistolet de base (munitions illimitées).
+
+Il y a trois armes différentes :
 * Le pistolet de base, il inflige peut de dégâts mais possède une quantitée illimité de munitions
 * Un pistolet automatique, la fréquence de tir est très élevée
 * Un lasergun, sa fréquence de tir est peu élevée et les projectiles sont lents, mais les dégâts sont importants
