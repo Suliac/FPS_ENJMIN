@@ -4,8 +4,8 @@ Cake Arena est un shooter de survie TPS, **en ligne**. Les joueurs doivent donc 
 Très inspiré de Quake, le but est d'être le premier à atteindre 5kills.
 
 ## Builds & vidéos
-* Trailer  : 
-* Gameplay :
+* Trailer  : https://youtu.be/KhOeaI2NKdE
+* Gameplay : https://youtu.be/jHBr9b0s_7U
 * Build    : CakeArena.7z à la racine du projet
 
 ## Commandes
